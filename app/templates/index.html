@@ -5,7 +5,7 @@
 <div>
     <h2>Publishes</h2>
     {% for post in posts %}
-    <p>{{post.author.nickname}} says: <i>{{post.body}}</i></p>
+    <p>{{post[0]}} says: <i>{{post[1]}}</i></p>
     {% endfor %}
 </div>
 
