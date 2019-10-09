@@ -1,7 +1,15 @@
-from flask_wtf import Form
-from wtforms import TextField, BooleanField
-from wtforms.validators import Required
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField
+from wtforms.validators import DataRequired, Length
 
-class LoginForm(Form):
-    openid = TextField('openid', validators = [Required()])
-    remember_me = BooleanField('remember_me', default = False)
+class SignInForm(FlaskForm):
+    name = StringField('Name', [DataRequired(), Length(max=30)])
+    password = PasswordField('Password', [DataRequired()])
+    submit = SubmitField('Submit', [DataRequired()])
+
+class SignUpForm(FlaskForm):
+    name = StringField('Name', [DataRequired(), Length(max=30)])
+    password = PasswordField('Password', [DataRequired()])
+    confirm_password = PasswordField('ConfirmPassword', [DataRequired()])
+    submit = SubmitField('Submit', [DataRequired()])
+    

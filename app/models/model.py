@@ -2,7 +2,8 @@ import mysql.connector
 from flask import Flask
 
 
-class Model:
+
+class Model():
     def __init__(self):
         self.db = mysql.connector.connect(
             host='localhost',
