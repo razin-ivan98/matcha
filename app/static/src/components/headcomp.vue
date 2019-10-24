@@ -19,10 +19,10 @@
             <b-nav-item-dropdown right>
               <!-- Using 'button-content' slot -->
               <template v-slot:button-content>
-                <em>{{ userName }}</em>
+                <em>{{ username }}</em>
               </template>
               <b-dropdown-item href="#">Profile</b-dropdown-item>
-              <b-dropdown-item href="#">Sign Out</b-dropdown-item>
+              <b-dropdown-item @click="signOut">Sign Out</b-dropdown-item>
             </b-nav-item-dropdown>
           </b-navbar-nav>
         </b-collapse>
@@ -35,8 +35,16 @@
 export default {
 
   name: 'headcomp',
+
   props: {
-    userName: String
+    username: String
+  },
+
+  methods: {
+    signOut(){
+      this.$emit('signed-out');
+      console.log('emitted');
+    }
   }
 
 }

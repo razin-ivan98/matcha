@@ -9,8 +9,8 @@ class SignIn(Model):
             hashlib.sha3_512(password.encode('utf-8')).hexdigest()
         )
         cursor.execute("SELECT name FROM users WHERE name = %s AND password = %s", params)
-        cursor.fetchall()
+        username = cursor.fetchall()[0][0]
         if cursor.rowcount > 0:
-            return True
+            return ({'answer': True, 'username': username})
         else:
-            return False
+            return {'answer': False}

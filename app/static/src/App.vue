@@ -2,7 +2,11 @@
 
   <div id="app">
   
-    <router-view/>
+    <router-view
+    @signed-out="onSigningOut"
+    @signed-in="onSigning"
+    :username="this.username"
+    ></router-view>
 
   </div>
 </template>
@@ -14,7 +18,30 @@
 
 export default {
   name: 'app',
-  username: ''
+  
+  data(){
+    return {
+      username: null
+    }
+  },
+
+  methods: {
+    onSigning(name){
+      this.$router.push('user');
+      this.username = name;
+    },
+
+    onSigningOut(){
+      console.log('ou');
+      this.$router.push('sign_in');
+    },
+
+
+  },
+
+  created(){
+    this.isSigned();
+  }
 }
 </script>
 

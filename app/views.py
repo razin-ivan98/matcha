@@ -13,38 +13,18 @@ import json
 
 
 @app.route('/')
-
 @app.route('/index', methods=['GET'])
 def index():
-  #  posts = Posts().get_posts()
-    return json.dumps({
-        'answer': True,
-        'name': 'Ivan'
-    })
+    if 'signed_user' in session:
+        return json.dumps({
+            'answer': True,
+            'username': session['signed_user']
+        })
+    else
+        return json.dumps({
+            'answer': False
+        })
 
-@app.route('/api/languages', methods=['GET'])
-def languages():
-    return json.dumps({
-        'languages': [
-            'assembly',
-            'c#',
-            'c',
-            'c++',
-            'go',
-            'java',
-            'javascript',
-            'object c',
-            'pascal',
-            'perl',
-            'php',
-            'python',
-            'R',
-            'ruby',
-            'SQL',
-            'swift',
-            'visual basic'
-        ]
-    })
 
 # @app.route('/sign_in', methods= ['GET'])
 # def sign_in_get():
@@ -59,9 +39,10 @@ def sign_in_post():
     form = SignInForm()
     if True:#validate
         res = SignIn().sign_in(form.login.data, form.password.data)
+        session['signed_user'] = res['username']
     else:
-        res = False
-    return json.dumps({ 'answer': res })
+        res = {'answer': False}
+    return json.dumps(res)
 
 # @app.route('/sign_up', methods=['GET'])
 # def sign_up_get():

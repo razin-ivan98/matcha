@@ -19,6 +19,7 @@ Vue.config.productionTip = false;
 var router = new VueRouter({
   mode: 'history',
   routes: [
+    { name: 'index', path: '/', component: index },
     { name: 'sign_in', path: '/sign_in', component: signIn },
     { name: 'sign_up', path: '/sign_up', component: signUp },
     { name: 'user', path: '/user', component: user }
