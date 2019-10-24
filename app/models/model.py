@@ -6,10 +6,10 @@ from flask import Flask
 class Model():
     def __init__(self):
         self.db = mysql.connector.connect(
-            host='localhost',
+            host='192.168.99.138',
             user='root',
-            passwd='',
-            database='matcha_db',
+            passwd='root',
+            database='base',
             charset='utf8mb4',
             collation='utf8mb4_unicode_ci',
             autocommit=True

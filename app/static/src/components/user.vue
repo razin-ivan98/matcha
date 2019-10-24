@@ -1,6 +1,6 @@
 <template>
   <div>
-    <headcomp @signed-out="signedOut" :username="this.username"></headcomp>
+    <headcomp @signed-out="signedOut"></headcomp>
       <b-card title="Prifile" style="max-width: 20rem;" class="mb-2 mt-5 mx-auto">
         <h2>Hello, {{this.username}}</h2>
       </b-card>
@@ -29,7 +29,7 @@ export default {
   },
   
   methods: {
-    signedOut()
+    signedOut()//повторяюсь. чет тут не так
     {
       this.$emit('signed-out');
     }

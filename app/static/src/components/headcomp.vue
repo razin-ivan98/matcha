@@ -32,19 +32,37 @@
 
 
 <script>
+import axios from 'axios'
+
 export default {
 
   name: 'headcomp',
 
-  props: {
-    username: String
+  data() {
+    return{
+      username: null
+    }
   },
 
   methods: {
     signOut(){
       this.$emit('signed-out');
       console.log('emitted');
+    },
+
+    getUserName(){
+      var self = this;
+      axios.get('/api/get_username').then(function (response) {
+          self.username = response.data.username;
+          console.log(response.data.username);
+        }, function (error) {
+          console.log(error)
+        })
     }
+  },
+
+  created(){
+    this.getUserName();
   }
 
 }

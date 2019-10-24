@@ -9,6 +9,7 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 import signIn from './components/signIn.vue'
 import signUp from './components/signUp.vue'
 import user from './components/user.vue'
+import index from './components/index.vue'
 
 Vue.use(BootstrapVue);
 Vue.use(VueRosource);

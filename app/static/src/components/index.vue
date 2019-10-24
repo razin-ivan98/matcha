@@ -4,15 +4,30 @@
 
 <script>
 
+import axios from 'axios'
+
 export default {
 
   methods: {
     isSigned(){
-      this.$emit('signed_out');
+      var self = this;
+      axios.get('/api/is_signed').then(function (response) {
+        ///  console.log(response);
+         // alert(response.data.answer);
+          if (response.data.answer === true)
+            self.$emit('signed-in', response.data.username);
+          else
+            self.$emit('signed-out', response.data.username);
+        }, function (error) {
+          console.log(error)
+        })
     }
 
     
-  }
+  },
 
+  created(){
+    this.isSigned();
+  }
 }
 </script>

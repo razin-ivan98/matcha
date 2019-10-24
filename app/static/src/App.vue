@@ -14,7 +14,7 @@
 <script>
 
 //  import signIn from './components/signIn.vue'
-
+import axios from 'axios'
 
 export default {
   name: 'app',
@@ -32,7 +32,12 @@ export default {
     },
 
     onSigningOut(){
-      console.log('ou');
+      
+      var self = this;
+      axios.get('/api/sign_out');
+
+
+
       this.$router.push('sign_in');
     },
 
@@ -40,7 +45,7 @@ export default {
   },
 
   created(){
-    this.isSigned();
+    //this.isSigned();
   }
 }
 </script>

@@ -12,18 +12,18 @@ from werkzeug.datastructures import MultiDict
 import json
 
 
-@app.route('/')
-@app.route('/index', methods=['GET'])
-def index():
-    if 'signed_user' in session:
-        return json.dumps({
-            'answer': True,
-            'username': session['signed_user']
-        })
-    else
-        return json.dumps({
-            'answer': False
-        })
+# @app.route('/')
+# @app.route('/index', methods=['GET'])
+# def index():
+#     if 'signed_user' in session:
+#         return json.dumps({
+#             'answer': True,
+#             'username': session['signed_user']
+#         })
+#     else:
+#         return json.dumps({
+#             'answer': False
+#         })
 
 
 # @app.route('/sign_in', methods= ['GET'])
@@ -63,3 +63,27 @@ def sign_up_post():
     else:
         res = False
     return json.dumps({ 'answer': res })
+
+@app.route('/api/is_signed', methods=['GET'])
+def is_signed():
+    if 'signed_user' in session:
+        return json.dumps({
+            'answer': True,
+            'username': session['signed_user']
+        })
+    else:
+        return json.dumps({
+            'answer': False
+        })
+
+@app.route('/api/sign_out', methods=['GET'])
+def sign_out():
+    session.clear()
+    return json.dumps({ 'answer': True })
+
+@app.route('/api/get_username', methods=['GET'])
+def get_username():
+    return json.dumps({
+            'answer': True,
+            'username': session['signed_user']
+        })
