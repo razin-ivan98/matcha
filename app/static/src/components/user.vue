@@ -1,6 +1,6 @@
 <template>
   <div>
-    <headcomp @signed-out="signedOut"></headcomp>
+    
       <b-card title="Prifile" style="max-width: 20rem;" class="mb-2 mt-5 mx-auto">
         <h2>Hello, {{this.username}}</h2>
       </b-card>
@@ -10,7 +10,6 @@
 
 <script>
 
-import headcomp from './headcomp.vue'
 
 export default {
 
@@ -21,21 +20,18 @@ export default {
   },
   
   props: {
-    username: String
+    username: null
   },
 
-  components: {
-    headcomp,
-  },
   
   methods: {
-    signedOut()//повторяюсь. чет тут не так
-    {
-      this.$emit('signed-out');
-    }
 
     
-  }
+  },
 
+  updated(){
+    //if (this.username === null)
+     // this.$emit('signed-out');
+  }
 }
 </script>

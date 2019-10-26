@@ -83,7 +83,13 @@ def sign_out():
 
 @app.route('/api/get_username', methods=['GET'])
 def get_username():
-    return json.dumps({
-            'answer': True,
-            'username': session['signed_user']
-        })
+    if 'signed_user' in session:
+        return json.dumps({
+                'answer': True,
+                'username': session['signed_user']
+            })
+    else:
+        return json.dumps({
+                'answer': False,
+                'username': ''
+            })

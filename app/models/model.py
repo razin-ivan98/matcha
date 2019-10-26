@@ -6,7 +6,7 @@ from flask import Flask
 class Model():
     def __init__(self):
         self.db = mysql.connector.connect(
-            host='192.168.99.138',
+            host='192.168.99.140',
             user='root',
             passwd='root',
             database='base',

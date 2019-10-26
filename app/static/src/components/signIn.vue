@@ -55,7 +55,7 @@ export default {
             var self = this;
             axios.post('/api/sign_in', this.form).then(function (response) {
                 console.log(response);
-                alert(response.data.answer);
+                //alert(response.data.answer);
                 self.$emit('signed-in', response.data.username);
             }, function (error) {
                 console.log(error)

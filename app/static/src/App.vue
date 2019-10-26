@@ -1,10 +1,14 @@
 <template>
 
   <div id="app">
-  
-    <router-view
+    <headcomp
     @signed-out="onSigningOut"
+    :username="this.username"
+    ></headcomp>
+
+    <router-view
     @signed-in="onSigning"
+    @signed-out="onSigningOut"
     :username="this.username"
     ></router-view>
 
@@ -13,7 +17,7 @@
 
 <script>
 
-//  import signIn from './components/signIn.vue'
+import headcomp from './components/headcomp.vue'
 import axios from 'axios'
 
 export default {
@@ -32,21 +36,42 @@ export default {
     },
 
     onSigningOut(){
-      
+      this.username = null;
       var self = this;
       axios.get('/api/sign_out');
-
-
 
       this.$router.push('sign_in');
     },
 
+    isSigned(){
+      var self = this;
+      axios.get('/api/get_username').then(function (response) {
+        ///  console.log(response);
+         // alert(response.data.answer);
+         //alert(response.data.username);
+          if (response.data.answer === true)
+          {
+            //alert(response.data.username);
+            self.username = response.data.username;
+          }
+          else
+            self.username = null;
+        }, function (error) {
+          console.log(error)
+        })
+    }
+
 
   },
 
-  created(){
-    //this.isSigned();
-  }
+  components: {
+    headcomp
+  },
+
+  async created() {///////////////////////////////////////////////////////////////////
+    const value = new Promise((resolve) => this.isSigned())////////////////////////////
+    //this.isSigned();//////////////////////////////
+  }//////////////////////////////////////////
 }
 </script>
 
