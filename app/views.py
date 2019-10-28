@@ -2,10 +2,12 @@ from flask import render_template, flash, redirect, session, request
 from app import app
 from app.forms import SignInForm
 from app.forms import SignUpForm
+from app.forms import InputDataForm
 
 from app.models.posts import Posts
 from app.models.sign_in import SignIn
 from app.models.sign_up import SignUp
+from app.models.input_data import InputData
 
 from werkzeug.datastructures import MultiDict
 
@@ -39,7 +41,9 @@ def sign_in_post():
     form = SignInForm()
     if True:#validate
         res = SignIn().sign_in(form.login.data, form.password.data)
-        session['signed_user'] = res['username']
+        print (res)
+        if res['answer'] == True:
+            session['signed_user'] = res['username']
     else:
         res = {'answer': False}
     return json.dumps(res)
@@ -93,3 +97,21 @@ def get_username():
                 'answer': False,
                 'username': ''
             })
+
+@app.route('/api/input_data', methods=['POST'])
+def input_data_post():
+    form = InputDataForm()
+
+    # print(form.password.data)
+    # print(form.confirm_password.data)
+    # print(form.validate())
+    # if form.password.data == form.confirm_password.data:#validate
+    res = InputData().input_data(session['signed_user'],
+                                form.firstname.data, 
+                                form.lastname.data,
+                                form.email.data,
+                                form.gender.data,
+                                form.orientation.data)
+    # else:
+    #     res = False
+    return json.dumps({ 'answer': True })

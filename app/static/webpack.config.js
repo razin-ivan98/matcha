@@ -1,5 +1,6 @@
 var path = require('path')
 var webpack = require('webpack')
+require('babel-polyfill')
 
 module.exports = {
   entry: './src/main.js',
@@ -80,7 +81,7 @@ module.exports = {
     noInfo: true,
     overlay: true,
     proxy: {
-    "/api": "http://localhost:5000"
+      "/api": "http://localhost:5000"
     }
   },
   performance: {

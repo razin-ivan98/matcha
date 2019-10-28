@@ -1,7 +1,10 @@
 <template>
   <div>
     
-      <b-card title="Prifile" style="max-width: 20rem;" class="mb-2 mt-5 mx-auto">
+      <b-card
+      title="Prifile"
+      style="max-width: 20rem;"
+      class="mb-2 mt-5 mx-auto">
         <h2>Hello, {{this.username}}</h2>
       </b-card>
     
@@ -13,25 +16,20 @@
 
 export default {
 
+  name: 'user',
+
   data(){
     return{
       //username: 'user',
     }
   },
-  
-  props: {
-    username: null
-  },
 
   
-  methods: {
-
-    
+  computed:{
+    username(){
+      return this.$store.getters.username;
+    }
   },
 
-  updated(){
-    //if (this.username === null)
-     // this.$emit('signed-out');
-  }
 }
 </script>

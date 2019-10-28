@@ -1,16 +1,22 @@
 <template>
-
   <div id="app">
     <headcomp
     @signed-out="onSigningOut"
-    :username="this.username"
     ></headcomp>
 
-    <router-view
+    <router-view 
+    v-if="this.$store.getters.username !== null"
     @signed-in="onSigning"
     @signed-out="onSigningOut"
-    :username="this.username"
     ></router-view>
+
+    <div class="text-center" v-if="this.$store.getters.username === null">
+    <b-spinner variant="success"
+    style="width: 3rem; height: 3rem;"
+    label="Large Spinner"
+    class="mt-5">
+    </b-spinner>
+    </div>
 
   </div>
 </template>
@@ -25,52 +31,70 @@ export default {
   
   data(){
     return {
-      username: null
+      //username: null
     }
   },
 
   methods: {
-    onSigning(name){
+    onSigning(name = null){
+      if (name !== null)
+        this.$store.commit('change_username', name);
       this.$router.push('user');
-      this.username = name;
+     
     },
 
     onSigningOut(){
-      this.username = null;
+      this.$store.commit('change_username', false);
       var self = this;
-      axios.get('/api/sign_out');
+      axios.get('/api/sign_out').then(function(){
+         self.$router.push('sign_in');
+       // this.$emit('signed-out');
+      });
 
-      this.$router.push('sign_in');
+     
     },
 
-    isSigned(){
+   isSigned(){
       var self = this;
       axios.get('/api/get_username').then(function (response) {
-        ///  console.log(response);
-         // alert(response.data.answer);
-         //alert(response.data.username);
           if (response.data.answer === true)
           {
-            //alert(response.data.username);
-            self.username = response.data.username;
+            self.$store.commit('change_username', response.data.username);
+            self.$store.commit('change_confirmed', response.data.confirmed);
           }
           else
-            self.username = null;
+            self.$store.commit('change_username', false);
         }, function (error) {
           console.log(error)
         })
+    },
+
+
+  },
+
+  computed: {
+    username(){
+      return this.$store.getters.username;
     }
-
-
   },
 
   components: {
     headcomp
   },
 
-  async created() {///////////////////////////////////////////////////////////////////
-    const value = new Promise((resolve) => this.isSigned())////////////////////////////
-    //this.isSigned();//////////////////////////////
+  watch: {
+    username: function(value){
+      if ((this.$route.name === 'sign_in' || this.$route.name === 'sign_up') && this.username !== false)
+        this.$router.push('user');
+      else if ((this.$route.name !== 'sign_in' && this.$route.name !== 'sign_up') && this.username === false)
+        this.$router.push('sign_in');
+    }
+  },
+
+ /* async */created() {///////////////////////////////////////////////////////////////////
+    console.log('isSigned started');
+    /*await*/ this.isSigned();//////////////////////////////
+    console.log('isSigned should be done');
   }//////////////////////////////////////////
 }
 </script>

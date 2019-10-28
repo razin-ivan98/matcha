@@ -1,5 +1,5 @@
 <template>
-
+<div>GOVONO</div>
 </template>
 
 <script>
@@ -26,16 +26,30 @@ export default {
     
   },
 
-  props: {
-    username: ''
+
+
+  // watch:{
+  //   username: function(val){
+  //     if (this.username === false)
+  //       this.$emit('signed-out');
+  //     else if (this.username === null){}
+  //     else{
+  //       this.$emit('signed-in');
+  //     }
+  //   }
+  // },
+  created(){
+    if (this.username === false)
+      this.$emit('signed-out');
+    else if (this.username === null){}
+    else
+      this.$emit('signed-in');
   },
 
-  mounted(){
-   // alert(this.username);
-    if (this.username !== null)
-      this.$emit('signed-in');
-    else
-      this.$emit('signed-out');
-  }
+  // computed:{
+  //   username(){
+  //     return this.$store.getters.username;
+  //   }
+  // },
 }
 </script>

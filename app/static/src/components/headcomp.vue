@@ -65,14 +65,17 @@ export default {
     //     })
     // }
   },
-
-  props: {
-    username: null
-  }
+  computed:{
+    username(){
+      return this.$store.getters.username;
+    }
+  },
 
   // created(){
   //   this.getUserName();
   // }
+
+
 
 }
 </script>

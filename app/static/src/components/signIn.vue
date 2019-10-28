@@ -29,7 +29,19 @@
             <b-button type="reset" variant="danger" class="ml-2">Reset</b-button>
         </b-form>
         <router-link to="/sign_up">Sign Up</router-link>
+        <b-alert
+        :show="dismissCountDown"
+        dismissible
+        fade
+        variant="danger"
+        @dismiss-count-down="countDownChanged"
+        >
+        Error
+        </b-alert>
     </b-card>
+
+
+
     </div>
    
 </template>
@@ -45,7 +57,10 @@ export default {
 
     data() {
       return {
-        form: {}
+        form: {},
+        dismissSecs: 5,
+        dismissCountDown: 0,
+        showDismissibleAlert: false
       }
     },
 
@@ -56,10 +71,21 @@ export default {
             axios.post('/api/sign_in', this.form).then(function (response) {
                 console.log(response);
                 //alert(response.data.answer);
-                self.$emit('signed-in', response.data.username);
+                if (response.data.answer === true)
+                    self.$emit('signed-in', response.data.username);
+                else
+                    self.showAlert();
             }, function (error) {
                 console.log(error)
+                
             })
+        },
+
+        countDownChanged(dismissCountDown) {
+            this.dismissCountDown = dismissCountDown
+        },
+        showAlert() {
+            this.dismissCountDown = this.dismissSecs
         }
     }
 }
