@@ -1,7 +1,7 @@
 <template>
 
   <div>
-  <b-card title="Sign In" style="max-width: 50rem;" class="mb-2 mt-5 mx-auto">
+  <b-card title="Information about u" style="max-width: 50rem;" class="mb-2 mt-5 mx-auto">
     <b-form @submit.prevent="onSubmit" v-if="show" >
 
       </b-container>
@@ -102,10 +102,10 @@ export default {
             axios.post('/api/input_data', this.form).then(function (response) {
                 console.log(response);
                 //alert(response.data.answer);
-               /* if (response.data.answer === true)
-                    self.$emit('signed-in', response.data.username);
+                if (response.data.answer === true)
+                    self.$emit('signed-in');
                 else
-                    self.showAlert();*/
+                    self.showAlert();
             }, function (error) {
                 console.log(error)
                 

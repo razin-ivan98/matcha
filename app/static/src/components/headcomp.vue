@@ -1,6 +1,6 @@
 <template>
     <div>
-      <b-navbar toggleable="lg" type="dark" variant="success">
+      <b-navbar toggleable="lg" type="dark" variant="success" fixed="top">
         <b-navbar-brand href="#">Matcha</b-navbar-brand>
 
 
@@ -9,8 +9,8 @@
 
           <b-collapse id="nav-collapse" is-nav>
             <b-navbar-nav>
-              <b-nav-item href="#">Likes</b-nav-item>
-              <b-nav-item href="#">Likes</b-nav-item>
+             <b-nav-item href="settings">Settings</b-nav-item>
+              <b-nav-item href="user">Feed</b-nav-item>
               <b-nav-item href="#">Likes</b-nav-item>
               <b-nav-item href="#">Likes</b-nav-item>
             
@@ -52,7 +52,6 @@ export default {
   methods: {
     signOut(){
       this.$emit('signed-out');
-      console.log('emitted');
     },
 
     // getUserName(){

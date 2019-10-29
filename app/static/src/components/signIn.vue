@@ -29,6 +29,7 @@
             <b-button type="reset" variant="danger" class="ml-2">Reset</b-button>
         </b-form>
         <router-link to="/sign_up">Sign Up</router-link>
+        <router-link to="/user">User</router-link>
         <b-alert
         :show="dismissCountDown"
         dismissible
@@ -69,10 +70,10 @@ export default {
         {
             var self = this;
             axios.post('/api/sign_in', this.form).then(function (response) {
-                console.log(response);
+                //console.log(response);
                 //alert(response.data.answer);
                 if (response.data.answer === true)
-                    self.$emit('signed-in', response.data.username);
+                    self.$emit('signed-in');
                 else
                     self.showAlert();
             }, function (error) {

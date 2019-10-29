@@ -1,6 +1,8 @@
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms import StringField, PasswordField, SubmitField, SelectField
 from wtforms.validators import DataRequired, Length
+from flask_uploads import UploadSet, IMAGES
 
 class SignInForm(FlaskForm):
     login = StringField('login', [DataRequired(), Length(max=30)])
@@ -28,4 +30,11 @@ class InputDataForm(FlaskForm):
         ('Pidor', 'Pidor')
     ])
 
+images = UploadSet('images', IMAGES)
+
+class UploadForm(FlaskForm):
+    file = FileField('image', validators=[
+        FileRequired(),
+        FileAllowed(images, 'Images only!')
+    ])
 

@@ -85,27 +85,33 @@ INSERT INTO `posts` (`id`, `body`, `user_id`) VALUES
 -- Дамп структуры для таблица matcha_db.users
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `avatar` varchar(256) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `firstname` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0',
   `lastname` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0',
   `gender` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0',
   `orientation` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0',
   `email` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0',
   `rating` int(11) NOT NULL DEFAULT '0',
-  `name` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `biography` varchar(4096) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `password` varchar(1024) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `confirmed` int(11) DEFAULT '0',
   `age` int(11) DEFAULT NULL,
   `orientation_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Дамп данных таблицы matcha_db.users: ~3 rows (приблизительно)
+-- Дамп данных таблицы matcha_db.users: ~8 rows (приблизительно)
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` (`id`, `firstname`, `lastname`, `gender`, `orientation`, `email`, `rating`, `name`, `biography`, `password`, `confirmed`, `age`, `orientation_id`) VALUES
-	(29, 'Ivan', 'Razin', 'Teapot', 'Pidor', 'hjlkjk@l', 0, 'Ivan', NULL, 'f6d1015e17df348f2d84b3b603648ae4bd14011f4e5b82f885e45587bcad48947d37d64501dc965c0f201171c44b656ee28ed9a5060aea1f2a336025320683d6', 0, 0, 0),
-	(30, 'khhj', 'LOL', 'Female', 'Natural', 'adress@k', 0, 'Irina', NULL, 'f6d1015e17df348f2d84b3b603648ae4bd14011f4e5b82f885e45587bcad48947d37d64501dc965c0f201171c44b656ee28ed9a5060aea1f2a336025320683d6', 0, 0, 0),
-	(31, '0', '0', '0', '0', '0', 0, 'EvgeniyPonasenkov', NULL, 'cde7190f13da5d30d02978a642a7ac14a3f5e75a32af5e7bbba98be62ea6145bf2f65baf2d6301e70c001babed36415d429466db9195d12905274b183cade09f', 0, 0, 0);
+INSERT INTO `users` (`id`, `name`, `avatar`, `firstname`, `lastname`, `gender`, `orientation`, `email`, `rating`, `biography`, `password`, `confirmed`, `age`, `orientation_id`) VALUES
+	(29, 'Ivan', '2019-10-30_005824.156358Ira2.jpg', 'Ivan', 'Razin', 'Male', 'Natural', 'hjlkjk@l', 0, NULL, 'f6d1015e17df348f2d84b3b603648ae4bd14011f4e5b82f885e45587bcad48947d37d64501dc965c0f201171c44b656ee28ed9a5060aea1f2a336025320683d6', 1, 0, 0),
+	(30, 'Irina', '2019-10-30_005546.205318av.jpg', 'Irina', 'Krot', 'Female', 'Natural', 'hjlkjk@l', 0, NULL, 'f6d1015e17df348f2d84b3b603648ae4bd14011f4e5b82f885e45587bcad48947d37d64501dc965c0f201171c44b656ee28ed9a5060aea1f2a336025320683d6', 1, 0, 0),
+	(31, 'EvgeniyPonasenkov', '2019-10-30_005647.393169pon.jpg', 'Evgeniy', 'Geniy', 'Male', 'Natural', 'Maestro@ya', 0, NULL, 'cde7190f13da5d30d02978a642a7ac14a3f5e75a32af5e7bbba98be62ea6145bf2f65baf2d6301e70c001babed36415d429466db9195d12905274b183cade09f', 1, 0, 0),
+	(32, 'LOL', '2019-10-30_005617.530224klim.jpg', 'khhj', 'Razin', 'Teapot', 'Pidor', 'hjlkjk@l', 0, NULL, 'f6d1015e17df348f2d84b3b603648ae4bd14011f4e5b82f885e45587bcad48947d37d64501dc965c0f201171c44b656ee28ed9a5060aea1f2a336025320683d6', 1, NULL, NULL),
+	(33, 'New', '2019-10-30_005854.881473d1f06e94b7c8081dbf5a6c499d563eca.jpg', 'sfvv', 'dvsvdv', 'Female', 'Gomosexual', 'vdvsv@rvbr', 0, NULL, 'f6d1015e17df348f2d84b3b603648ae4bd14011f4e5b82f885e45587bcad48947d37d64501dc965c0f201171c44b656ee28ed9a5060aea1f2a336025320683d6', 1, NULL, NULL),
+	(34, 'QWERTY', '2019-10-30_005724.563620f34927df34192a15b6af21fcf3fd4bf3.jpg', 'Aleksey', 'Petrovi4', 'Transgender', 'Gomosexual', 'jhjh@jjhl', 0, NULL, 'f6d1015e17df348f2d84b3b603648ae4bd14011f4e5b82f885e45587bcad48947d37d64501dc965c0f201171c44b656ee28ed9a5060aea1f2a336025320683d6', 1, NULL, NULL),
+	(35, 'Kek', '2019-10-30_005754.898732avatar.gif', 'Kke', 'lol', 'Teapot', 'Pidor', 'hjlkjk@l', 0, NULL, 'f6d1015e17df348f2d84b3b603648ae4bd14011f4e5b82f885e45587bcad48947d37d64501dc965c0f201171c44b656ee28ed9a5060aea1f2a336025320683d6', 1, NULL, NULL),
+	(36, 'qqq', '2019-10-30_002735.187815Biografiya-Iosif-Stalin-1.jpg', 'Kostya', 'Marinenkov', 'Transgender', 'Bisexual', 'hjlkjk@l', 0, NULL, 'f6d1015e17df348f2d84b3b603648ae4bd14011f4e5b82f885e45587bcad48947d37d64501dc965c0f201171c44b656ee28ed9a5060aea1f2a336025320683d6', 1, NULL, NULL);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
