@@ -14,6 +14,8 @@ import signUp from './components/signUp.vue'
 import user from './components/user.vue'
 import input_data from './components/input_data.vue'
 import settings from './components/settings.vue'
+import my_profile from './components/my_profile.vue'
+import profile from './components/profile.vue'
 
 import axios from 'axios'
 
@@ -38,7 +40,11 @@ var router = new VueRouter({
 
     { name: 'settings', path: '/settings', component: settings, meta: { requiresAuth: true, requiresConfirm: true } },
 
-    { name: 'input_data', path: '/input_data', component: input_data, meta: { requiresAuth: true } }
+    { name: 'my_profile', path: '/my_profile', component: my_profile, meta: { requiresAuth: true, requiresConfirm: true } },
+
+    { name: 'input_data', path: '/input_data', component: input_data, meta: { requiresAuth: true } },
+
+    { name: 'profile', path: '/profile/:username', component: profile, meta: { requiresAuth: true } }
 
   ]
 })
@@ -85,6 +91,7 @@ const store = new Vuex.Store({
   state: {
     username: null,
     confirmed: null,
+    user_info: null,
     status: 'ready'
   },
   mutations: {
@@ -97,6 +104,9 @@ const store = new Vuex.Store({
     change_status(state, new_status) {
       state.status = new_status;
     },
+    change_user_info(state, new_info) {
+      state.user_info = new_info;
+    },
   },
   getters: {
     username: state => {
@@ -108,6 +118,9 @@ const store = new Vuex.Store({
     status: state => {
       return state.status;
     },
+    user_info: state => {
+      return state.user_info;
+    }
   },
   actions: {
     isSigned({ commit }) {
@@ -117,6 +130,7 @@ const store = new Vuex.Store({
           if (response.data.answer === true) {
             commit('change_username', response.data.username);
             commit('change_confirmed', response.data.confirmed);
+            commit('change_user_info', response.data.user_info);
             console.log('done');
             resolve(true);
           }

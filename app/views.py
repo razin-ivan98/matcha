@@ -19,6 +19,8 @@ import datetime
 
 import json
 
+from PIL import Image
+
 import os
 
 
@@ -99,16 +101,19 @@ def sign_out():
 def get_username():
     if 'signed_user' in session:
         confirmed = User().is_confirmed(session['signed_user'])
+        user_info = User().get_user_info(session['signed_user'])
         return json.dumps({
                 'answer': True,
                 'username': session['signed_user'],
-                'confirmed': confirmed
+                'confirmed': confirmed,
+                'user_info': user_info
             })
     else:
         return json.dumps({
                 'answer': False,
                 'username': '',
-                'confirmed': 0
+                'confirmed': 0,
+                'user_info': False
             })
 
 @app.route('/api/input_data', methods=['POST'])
@@ -143,8 +148,20 @@ def upload_image():
     # form = UploadForm()#validate
     # file = form.file.data
     file = request.files['file']
+    coordinates = json.loads(request.form.get('coordinates'))   
+    
     filename = secure_filename( str(datetime.datetime.now()) + file.filename)
-    file.save(os.path.join(os.path.abspath('images'), filename))
+    filepath = os.path.join(os.path.abspath('images'), filename)
+
+    file.save(filepath)
+    print (filepath)
+    img = Image.open(filepath)
+    coordinates_to_crop = (coordinates['left'],
+                            coordinates['top'],
+                            coordinates['left'] + coordinates['width'],
+                            coordinates['top'] + coordinates['height'])
+    cropped = img.crop( coordinates_to_crop )
+    cropped.save(filepath)
     User().upload_image(filename, session['signed_user'])
     return json.dumps({ 'answer': True })
     
@@ -154,7 +171,39 @@ def download_image():
     if avatar == False:
         return False
     file = send_from_directory(os.path.abspath('images'), avatar)
-    
     response = make_response(file, 200)
     response.headers.set('Content-type', 'image')
     return response
+
+@app.route('/api/get_avatar', methods=['GET'])
+def get_avatar():
+    username = request.args.get('user')
+    avatar = User().get_avatar(session['signed_user'])
+    file = send_from_directory(os.path.abspath('images'), avatar)  
+    response = make_response(file, 200)
+    response.headers.set('Content-type', 'image')
+    return response
+
+@app.route('/api/get_user_info', methods=['GET'])
+def get_user_info():
+    username = request.args.get('username')
+    user_info = User().get_user_info(username)
+
+    if (user_info == False):
+        return json.dumps({ 'answer': False })
+    return json.dumps({ 'answer': True,
+                        'user_info': user_info})
+
+@app.route('/api/like', methods=['GET'])
+def like():
+    username = request.args.get('username')
+    if not (User().is_liked(session['signed_user'], username)):
+        User().like(session['signed_user'], username)
+    return json.dumps({ 'answer': True})
+
+@app.route('/api/unlike', methods=['GET'])
+def unlike():
+    username = request.args.get('username')
+    if (User().is_liked(session['signed_user'], username)):
+        User().unlike(session['signed_user'], username)
+    return json.dumps({ 'answer': True})
