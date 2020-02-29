@@ -50,53 +50,56 @@
             </template>
           </b-card>
         </b-card-group>
+        <div style="height: 5rem"></div>
       </b-container>
+    </div>
 
-      <b-navbar toggleable="lg" type="dark" variant="success" fixed="bottom">
-        <b-card no-body class="mb-1 mx-auto w-50">
-          <b-button block href="#" v-b-toggle.accordion-1 variant="info">Filtres</b-button>
-          <b-collapse id="accordion-1" visible accordion="my-accordion" role="tabpanel">
-            <b-card-body>
-              <b-form-group>
-                <b-form-radio v-model="filtres.show" value="all">All users</b-form-radio>
-                <b-form-radio v-model="filtres.show" value="recommended">Recommended</b-form-radio>
-                <b-form-radio v-model="filtres.show" value="friends">Friends</b-form-radio>
-                <b-form-radio v-model="filtres.show" value="lokers">Likers</b-form-radio>
-                <b-form-radio v-model="filtres.show" value="liked">Liked</b-form-radio>
-                <b-form-radio v-model="filtres.show" value="custom">Custom filtres</b-form-radio>
-                <b-form-group v-if="filtres.show == 'custom'">
-                  <b-form-group label="Gender">
-                    <b-form-checkbox-group
-                      id="checkbox-group-2"
-                      v-model="filtres.gender"
-                      name="flavour-2"
-                    >
-                      <b-form-checkbox value="Male">Male</b-form-checkbox>
-                      <b-form-checkbox value="Female">Female</b-form-checkbox>
-                      <b-form-checkbox value="Teapot">Teapot</b-form-checkbox>
-                      <b-form-checkbox value="Transgender">Transgender</b-form-checkbox>
-                    </b-form-checkbox-group>
-                  </b-form-group>
+    <b-navbar variant="success" fixed="bottom">
+      <b-card no-body class="mb-1 w-75 mx-auto">
+        <b-card-header header-tag="header" class="p-0" role="tab">
+          <b-button v-b-toggle.accordion-1 variant="success" class="w-100">Filtres</b-button>
+        </b-card-header>
+        <b-collapse id="accordion-1" class="mt-2">
+          <b-card-body>
+            <b-form-group>
+              <b-form-radio v-model="filtres.show" value="all">All users</b-form-radio>
+              <b-form-radio v-model="filtres.show" value="recommended">Recommended</b-form-radio>
+              <b-form-radio v-model="filtres.show" value="friends">Friends</b-form-radio>
+              <b-form-radio v-model="filtres.show" value="likers">Likers</b-form-radio>
+              <b-form-radio v-model="filtres.show" value="liked">Liked</b-form-radio>
+              <b-form-radio v-model="filtres.show" value="custom">Custom filtres</b-form-radio>
+              <b-form-group v-if="filtres.show == 'custom'">
+                <b-form-group label="Gender">
+                  <b-form-checkbox-group
+                    id="checkbox-group-2"
+                    v-model="filtres.gender"
+                    name="flavour-2"
+                  >
+                    <b-form-checkbox value="Male">Male</b-form-checkbox>
+                    <b-form-checkbox value="Female">Female</b-form-checkbox>
+                    <b-form-checkbox value="Teapot">Teapot</b-form-checkbox>
+                    <b-form-checkbox value="Transgender">Transgender</b-form-checkbox>
+                  </b-form-checkbox-group>
+                </b-form-group>
 
-                  <b-form-group label="Orientation">
-                    <b-form-checkbox-group
-                      id="checkbox-group-3"
-                      v-model="filtres.orientation"
-                      name="flavour-2"
-                    >
-                      <b-form-checkbox value="Natural">Natural</b-form-checkbox>
-                      <b-form-checkbox value="Gomosexual">Gomosexual</b-form-checkbox>
-                      <b-form-checkbox value="Bisexual">Bisexual</b-form-checkbox>
-                      <b-form-checkbox value="Pidor">Pidor</b-form-checkbox>
-                    </b-form-checkbox-group>
-                  </b-form-group>
+                <b-form-group label="Orientation">
+                  <b-form-checkbox-group
+                    id="checkbox-group-3"
+                    v-model="filtres.orientation"
+                    name="flavour-2"
+                  >
+                    <b-form-checkbox value="Natural">Natural</b-form-checkbox>
+                    <b-form-checkbox value="Gomosexual">Gomosexual</b-form-checkbox>
+                    <b-form-checkbox value="Bisexual">Bisexual</b-form-checkbox>
+                    <b-form-checkbox value="Pidor">Pidor</b-form-checkbox>
+                  </b-form-checkbox-group>
                 </b-form-group>
               </b-form-group>
-            </b-card-body>
-          </b-collapse>
-        </b-card>
-      </b-navbar>
-    </div>
+            </b-form-group>
+          </b-card-body>
+        </b-collapse>
+      </b-card>
+    </b-navbar>
   </div>
 </template>
 
@@ -124,6 +127,24 @@ export default {
     },
     unlike(username) {
       axios.get("/api/unlike?username=" + username).then();
+    },
+    get_users() {
+      this.waiting = true;
+      var self = this;
+      console.log(this.users);
+      axios
+        .get(
+          "/api/get_recomended_users?filtres=" + JSON.stringify(this.filtres)
+        )
+        .then(function(response) {
+          if (response.data.answer === true) {
+            self.users = response.data.users;
+            console.log(self.users);
+            self.waiting = false;
+          } else {
+            ////////////////////////////////
+          }
+        });
     }
   },
 
@@ -132,18 +153,18 @@ export default {
       return this.$store.getters.username;
     }
   },
+
+  watch: {
+    filtres: {
+      handler: function(val) {
+        this.get_users();
+      },
+      deep: true
+    }
+  },
+
   mounted() {
-    var self = this;
-    console.log(this.users);
-    axios.get("/api/get_recomended_users").then(function(response) {
-      if (response.data.answer === true) {
-        self.users = response.data.users;
-        console.log(self.users);
-        self.waiting = false;
-      } else {
-        ////////////////////////////////
-      }
-    });
+    this.get_users();
   }
 };
 </script>

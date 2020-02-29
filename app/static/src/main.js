@@ -16,6 +16,7 @@ import input_data from './components/input_data.vue'
 import settings from './components/settings.vue'
 import my_profile from './components/my_profile.vue'
 import profile from './components/profile.vue'
+import likes from './components/likes.vue'
 
 import axios from 'axios'
 
@@ -44,7 +45,9 @@ var router = new VueRouter({
 
     { name: 'input_data', path: '/input_data', component: input_data, meta: { requiresAuth: true } },
 
-    { name: 'profile', path: '/profile/:username', component: profile, meta: { requiresAuth: true } }
+    { name: 'profile', path: '/profile/:username', component: profile, meta: { requiresAuth: true, requiresConfirm: true } },
+
+    { name: 'likes', path: '/likes', component: likes, meta: { requiresAuth: true, requiresConfirm: true } }
 
   ]
 })
@@ -92,6 +95,7 @@ const store = new Vuex.Store({
     username: null,
     confirmed: null,
     user_info: null,
+    likes: null,
     status: 'ready'
   },
   mutations: {
@@ -107,6 +111,9 @@ const store = new Vuex.Store({
     change_user_info(state, new_info) {
       state.user_info = new_info;
     },
+    change_likes(state, new_likes) {
+      state.likes = new_likes;
+    }
   },
   getters: {
     username: state => {
@@ -120,6 +127,9 @@ const store = new Vuex.Store({
     },
     user_info: state => {
       return state.user_info;
+    },
+    likes: state => {
+      return state.likes;
     }
   },
   actions: {

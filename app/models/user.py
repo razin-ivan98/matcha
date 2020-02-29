@@ -17,11 +17,10 @@ class User(Model):
         # else:
         
 
-    def get_recomended_users(self, login):
+    def get_all_users(self, login):
         cursor = self.db.cursor(dictionary=True)
         params = (login,)
         cursor.execute("SELECT * FROM users WHERE name != %s", params)
-        
         res = cursor.fetchall()
         for user in res:
             del user['password']
@@ -61,9 +60,29 @@ class User(Model):
     def like(self, liker, liked):
         cursor = self.db.cursor()#проверка, есть ли такой юзер
         params = (liker, liked,)
-        cursor.execute("INSERT INTO likes (liker, liked, date) VALUES (%s, %s, NOW())", params)
+        cursor.execute("INSERT INTO likes (liker, liked, date, got) VALUES (%s, %s, NOW(), 0)", params)
 
     def unlike(self, liker, liked):
         cursor = self.db.cursor()#проверка, есть ли такой юзер
         params = (liker, liked,)
         cursor.execute("DELETE FROM likes WHERE liker=%s AND liked=%s", params)
+
+    def get_likes(self, liked):
+        cursor = self.db.cursor(dictionary=True)
+        params = (liked,)
+        cursor.execute("SELECT l.id, l.liker, l.liked, l.got, DATE_FORMAT(l.date,'%d-%m-%Y') date, u.firstname, u.lastname FROM likes l  INNER JOIN users u ON u.name = l.liker WHERE l.liked=%s", params)
+        res = cursor.fetchall()
+        return res
+
+    def get_unread_likes_count(self, liked):
+        cursor = self.db.cursor()
+        params = (liked,)
+        cursor.execute("SELECT COUNT(*) FROM likes WHERE liked=%s AND got=0", params)
+        res = cursor.fetchall()[0][0]
+        return res
+
+    def like_read(self, like_id):
+        cursor = self.db.cursor()
+        params = (like_id,)
+        cursor.execute("UPDATE likes SET got=1 WHERE id=%s", params)
+        return True

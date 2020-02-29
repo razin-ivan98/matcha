@@ -2,13 +2,19 @@
   <div>
     <b-navbar toggleable="lg" type="dark" variant="success" fixed="top" v-if="this.username">
       <b-navbar-brand href="/">Matcha</b-navbar-brand>
-      <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
+      <b-navbar-toggle target="nav-collapse">
+        <b-badge v-if="likes > 0" variant="warning">{{ likes }}</b-badge>
+      </b-navbar-toggle>
       <b-collapse id="nav-collapse" is-nav>
         <b-navbar-nav>
           <b-nav-item href="/settings">Settings</b-nav-item>
           <b-nav-item href="/user">Feed</b-nav-item>
           <b-nav-item href="/my_profile">Profile</b-nav-item>
-          <b-nav-item>Likes</b-nav-item>
+          <b-nav-item href="/likes">
+            Likes
+            <b-badge v-if="likes > 0" variant="warning">{{ likes }}</b-badge>
+          </b-nav-item>
+          <b-nav-item href="/chats">Chats</b-nav-item>
         </b-navbar-nav>
         <!-- Right aligned nav items -->
         <b-navbar-nav class="ml-auto">
@@ -37,12 +43,6 @@ import axios from "axios";
 export default {
   name: "headcomp",
 
-  // data() {
-  //   return{
-  //     username: null
-  //   }
-  // },
-
   methods: {
     signOut() {
       this.$emit("signed-out");
@@ -61,6 +61,9 @@ export default {
   computed: {
     username() {
       return this.$store.getters.username;
+    },
+    likes() {
+      return this.$store.getters.likes;
     }
   }
 

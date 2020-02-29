@@ -1,5 +1,8 @@
 from flask import make_response, flash, redirect, session, request, send_from_directory
 from app import app
+
+from app.filtres import Filtres
+
 from app.forms import SignInForm
 from app.forms import SignUpForm
 from app.forms import InputDataForm
@@ -138,7 +141,19 @@ def input_data_post():
 
 @app.route('/api/get_recomended_users', methods=['GET'])
 def get_recomended_users():
-    res = User().get_recomended_users(session['signed_user'])
+    filtres = json.loads(request.args.get('filtres'))
+    res = User().get_all_users(session['signed_user'])
+
+    if filtres['show'] == 'likers':
+        res = list(filter(Filtres().likers_filter, res))
+    elif filtres['show'] == 'liked':
+        res = list(filter(Filtres().liked_filter, res))
+    elif filtres['show'] == 'friends':
+        res = list(filter(Filtres().friends_filter, res))
+    elif filtres['show'] == 'custom':
+        res = Filtres().orientation_filter(res, filtres['orientation'])
+        res = Filtres().gender_filter(res, filtres['gender'])
+        
     return json.dumps({ 'answer': True , 'users': res})
 
 
@@ -154,7 +169,6 @@ def upload_image():
     filepath = os.path.join(os.path.abspath('images'), filename)
 
     file.save(filepath)
-    print (filepath)
     img = Image.open(filepath)
     coordinates_to_crop = (coordinates['left'],
                             coordinates['top'],
@@ -177,8 +191,8 @@ def download_image():
 
 @app.route('/api/get_avatar', methods=['GET'])
 def get_avatar():
-    username = request.args.get('user')
-    avatar = User().get_avatar(session['signed_user'])
+    username = request.args.get('username')
+    avatar = User().get_avatar(username)
     file = send_from_directory(os.path.abspath('images'), avatar)  
     response = make_response(file, 200)
     response.headers.set('Content-type', 'image')
@@ -207,3 +221,25 @@ def unlike():
     if (User().is_liked(session['signed_user'], username)):
         User().unlike(session['signed_user'], username)
     return json.dumps({ 'answer': True})
+
+@app.route('/api/get_likes', methods=['GET'])
+def get_likes():
+    res = User().get_likes(session['signed_user'])
+    return json.dumps({ 'answer': True,
+                        'likes': res })
+
+@app.route('/api/like_read', methods=['GET'])
+def like_read():
+    like_id = request.args.get('like_id')
+    User().like_read(like_id)
+    return json.dumps({ 'answer': True })
+
+@app.route('/api/get_unread_likes_count', methods=['GET'])
+def get_unread_likes_count():
+    res = User().get_unread_likes_count(session['signed_user'])
+    return json.dumps({ 'answer': True , 'likes_count': res})
+
+@app.route('/api/get_my_chats', methods=['GET'])
+def get_my_chats():
+    res = Chat().get_my_chats(session['signed_user'])
+    return json.dumps({ 'answer': True , 'likes_count': res})

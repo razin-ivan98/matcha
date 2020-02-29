@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <headcomp @signed-out="onSigningOut"></headcomp>
+    <headcomp @signed-out="onSigningOut" @update="updateAll"></headcomp>
 
     <div style="height: 50px"></div>
 
@@ -48,6 +48,14 @@ export default {
       axios.get("/api/sign_out").then(function() {
         self.$router.push("sign_in");
       });
+    },
+
+    updateAll() {
+      var self = this;
+      axios.get("/api/get_unread_likes_count").then(function(response) {
+        if (response.data.answer === true)
+          self.$store.commit("change_likes", response.data.likes_count);
+      });
     }
 
     // isSigned() {
@@ -90,21 +98,12 @@ export default {
     headcomp
   },
 
-  watch: {
-    // username: function(){
-    //   this.redirects();
-    // },
-    // curr_route: function(){
-    //   this.redirects();
-    // }
-  },
-
-  /*async*/ created() {
-    ///////////////////////////////////////////////////////////////////
-    // console.log('isSigned started');
-    // await this.isSigned();//////////////////////////////
-    // console.log('isSigned should be done');
-  } //////////////////////////////////////////
+  mounted() {
+    this.updateAll();
+    setInterval(() => {
+      this.updateAll();
+    }, 5000);
+  }
 };
 </script>
 
