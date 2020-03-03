@@ -3,7 +3,7 @@
     <b-navbar toggleable="lg" type="dark" variant="success" fixed="top" v-if="this.username">
       <b-navbar-brand href="/">Matcha</b-navbar-brand>
       <b-navbar-toggle target="nav-collapse">
-        <b-badge v-if="likes > 0" variant="warning">{{ likes }}</b-badge>
+        <b-badge v-if="likes + dialogs > 0" variant="warning">{{ likes + dialogs }}</b-badge>
       </b-navbar-toggle>
       <b-collapse id="nav-collapse" is-nav>
         <b-navbar-nav>
@@ -14,7 +14,10 @@
             Likes
             <b-badge v-if="likes > 0" variant="warning">{{ likes }}</b-badge>
           </b-nav-item>
-          <b-nav-item href="/chats">Chats</b-nav-item>
+          <b-nav-item href="/chats">
+            Chats
+            <b-badge v-if="dialogs > 0" variant="warning">{{ dialogs }}</b-badge>
+          </b-nav-item>
         </b-navbar-nav>
         <!-- Right aligned nav items -->
         <b-navbar-nav class="ml-auto">
@@ -64,6 +67,9 @@ export default {
     },
     likes() {
       return this.$store.getters.likes;
+    },
+    dialogs() {
+      return this.$store.getters.dialogs;
     }
   }
 

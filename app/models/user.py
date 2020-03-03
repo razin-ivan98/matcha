@@ -26,6 +26,7 @@ class User(Model):
             del user['password']
             user['liked'] = self.is_liked(login, user['name'])
             user['liked_me'] = self.is_liked(user['name'], login)
+            user['online'] = user['online'].strftime("%d-%m-%Y %H:%M:%S")
         return (res)
 
     def upload_image(self, filename, login):
@@ -46,6 +47,7 @@ class User(Model):
         cursor.execute("SELECT * FROM users WHERE name=%s", params)
         res = cursor.fetchall()[0]
         del res['password']
+        res['online'] = res['online'].strftime("%d-%m-%Y %H:%M:%S")
         return res
         
     def is_liked(self, liker, liked):
@@ -59,6 +61,7 @@ class User(Model):
     
     def like(self, liker, liked):
         cursor = self.db.cursor()#проверка, есть ли такой юзер
+
         params = (liker, liked,)
         cursor.execute("INSERT INTO likes (liker, liked, date, got) VALUES (%s, %s, NOW(), 0)", params)
 
@@ -86,3 +89,8 @@ class User(Model):
         params = (like_id,)
         cursor.execute("UPDATE likes SET got=1 WHERE id=%s", params)
         return True
+
+    def set_online(self, user):
+        cursor = self.db.cursor()
+        params = (user,)
+        cursor.execute("UPDATE users SET online=NOW() WHERE name=%s", params)

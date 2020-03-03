@@ -17,6 +17,8 @@ import settings from './components/settings.vue'
 import my_profile from './components/my_profile.vue'
 import profile from './components/profile.vue'
 import likes from './components/likes.vue'
+import chats from './components/chats.vue'
+import chat from './components/chat.vue'
 
 import axios from 'axios'
 
@@ -47,7 +49,11 @@ var router = new VueRouter({
 
     { name: 'profile', path: '/profile/:username', component: profile, meta: { requiresAuth: true, requiresConfirm: true } },
 
-    { name: 'likes', path: '/likes', component: likes, meta: { requiresAuth: true, requiresConfirm: true } }
+    { name: 'likes', path: '/likes', component: likes, meta: { requiresAuth: true, requiresConfirm: true } },
+
+    { name: 'chats', path: '/chats', component: chats, meta: { requiresAuth: true, requiresConfirm: true } },
+
+    { name: 'chat', path: '/chat/:username', component: chat, meta: { requiresAuth: true, requiresConfirm: true } }
 
   ]
 })
@@ -96,6 +102,7 @@ const store = new Vuex.Store({
     confirmed: null,
     user_info: null,
     likes: null,
+    dialogs: null,
     status: 'ready'
   },
   mutations: {
@@ -113,6 +120,9 @@ const store = new Vuex.Store({
     },
     change_likes(state, new_likes) {
       state.likes = new_likes;
+    },
+    change_dialogs(state, new_dialogs) {
+      state.dialogs = new_dialogs;
     }
   },
   getters: {
@@ -130,6 +140,9 @@ const store = new Vuex.Store({
     },
     likes: state => {
       return state.likes;
+    },
+    dialogs: state => {
+      return state.dialogs;
     }
   },
   actions: {

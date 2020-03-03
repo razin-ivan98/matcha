@@ -5,13 +5,17 @@ from wtforms.validators import DataRequired, Length
 from flask_uploads import UploadSet, IMAGES
 
 class SignInForm(FlaskForm):
-    login = StringField('login', [DataRequired(), Length(max=30)])
+    login = StringField('login', [DataRequired(), Length(max=64)])
     password = PasswordField('password', [DataRequired()])
 
 class SignUpForm(FlaskForm):
-    login = StringField('login', [DataRequired(), Length(max=30)])
+    login = StringField('login', [DataRequired(), Length(max=64)])
     password = PasswordField('password', [DataRequired()])
     confirm_password = PasswordField('confirm_password', [DataRequired()])
+
+class NewMessageForm(FlaskForm):
+    friend = StringField('friend', [DataRequired(), Length(max=64)])
+    curr_message = StringField('curr_message', [DataRequired()])
     
 class InputDataForm(FlaskForm):
     firstname = StringField('firstname', [DataRequired(), Length(max=64)])

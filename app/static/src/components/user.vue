@@ -25,6 +25,8 @@
             style="min-width: 17rem; max-width: 30rem; display: inline-block"
             footer-tag="footer"
           >
+            <b-card-text>{{'Был в сети ' + get_online(user.online) }}</b-card-text>
+
             <b-card-text>{{ user.gender }}</b-card-text>
 
             <b-card-text>{{ user.orientation }}</b-card-text>
@@ -106,6 +108,8 @@
 <script>
 import axios from "axios";
 
+import moment from "moment";
+
 export default {
   name: "user",
 
@@ -145,6 +149,12 @@ export default {
             ////////////////////////////////
           }
         });
+    },
+
+    get_online(str) {
+      return moment().unix() - moment(str, "DD-MM-YYYY hh:mm:ss").unix() < 100
+        ? "В Сети"
+        : moment(str, "DD-MM-YYYY hh:mm:ss").fromNow();
     }
   },
 
@@ -165,6 +175,7 @@ export default {
 
   mounted() {
     this.get_users();
+    moment.locale("ru");
   }
 };
 </script>

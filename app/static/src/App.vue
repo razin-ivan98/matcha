@@ -56,6 +56,11 @@ export default {
         if (response.data.answer === true)
           self.$store.commit("change_likes", response.data.likes_count);
       });
+
+      axios.get("/api/get_unread_dialogs_count").then(function(response) {
+        if (response.data.answer === true)
+          self.$store.commit("change_dialogs", response.data.dialogs_count);
+      });
     }
 
     // isSigned() {

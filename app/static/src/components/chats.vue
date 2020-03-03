@@ -23,6 +23,14 @@
             {{ chat.friend.firstname + ' ' + chat.friend.lastname }}
             <b-button :href="'/profile/' + chat.friend.name" variant="primary">Profile</b-button>
             <b-button :href="'/chat/'+chat.friend.name" variant="success">Chat</b-button>
+            <span style="float:right;">
+              {{'Последнее сообщение ' + mom(chat.last_activity, "DD-MM-YYYY hh:mm:ss") }}
+              <b-badge
+                style="float:right;"
+                v-if="chat.unread > 0"
+                variant="warning"
+              >{{ chat.unread }}</b-badge>
+            </span>
           </b-card>
         </b-card>
       </b-container>
@@ -34,6 +42,7 @@
 
 <script>
 import axios from "axios";
+import moment from "moment";
 
 export default {
   name: "chats",
@@ -48,13 +57,23 @@ export default {
   methods: {
     getMyChats() {
       var self = this;
-      axios.get("/api/get_my_chats" + username).then(function(response) {
+      axios.get("/api/get_my_chats").then(function(response) {
         if (response.data.answer === true) self.chats = response.data.chats;
       });
+    },
+    mom(str, pattern) {
+      return moment(str, pattern).fromNow();
+    }
+  },
+  computed: {
+    username() {
+      return this.$store.getters.username;
     }
   },
   mounted() {
-    getMyChats();
+    moment.locale("ru");
+    this.getMyChats();
+    console.log(this.chats, "chats");
   }
 };
 </script>
