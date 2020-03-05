@@ -223,6 +223,7 @@ def like():
     if not (User().is_liked(session['signed_user'], username)):
         User().like(session['signed_user'], username)
         Chat().create_dialog(session['signed_user'], username)
+        Chat().new_message(session['signed_user'], username, "Привет, теперь мы друзья!")
     return json.dumps({ 'answer': True})
 
 @app.route('/api/unlike', methods=['GET'])

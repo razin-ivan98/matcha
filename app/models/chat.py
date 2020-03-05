@@ -5,7 +5,7 @@ class Chat(Model):
     def get_my_chats(self, username):
         cursor = self.db.cursor(dictionary=True)
         params = (username, username,)
-        cursor.execute("SELECT * FROM dialogs WHERE friend_1 = %s OR friend_2 = %s ORDER BY last_activity ASC", params)
+        cursor.execute("SELECT * FROM dialogs WHERE friend_1 = %s OR friend_2 = %s ORDER BY last_activity DESC", params)
         res = cursor.fetchall()
         ret = []
         
@@ -14,7 +14,7 @@ class Chat(Model):
             friend_name = elem['friend_2'] if elem['friend_1'] == username else elem['friend_1'] 
             friend = User().get_user_info(friend_name)
             ret_elem['friend'] = friend
-            ret_elem['unread'] = elem['unread']
+            ret_elem['unread'] = 0 if elem['last_activist'] == username else elem['unread']
             ret_elem['last_activity'] = elem['last_activity'].strftime("%d-%m-%Y %H:%M:%S")
             ret.append(ret_elem)
         return  ret
