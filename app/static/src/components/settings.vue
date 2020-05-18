@@ -17,6 +17,7 @@
           <b-button type="reset" variant="danger">Reset</b-button>
         </b-form-group>
       </b-form>
+
       <cropper
         ref="cropper"
         v-if="this.image != null"

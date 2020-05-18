@@ -13,12 +13,24 @@
       <b-row>
         <b-col>
           <b-card>
-            <b-img
+            <div>
+              <b-carousel
+                id="carousel-fade"
+                style="text-shadow: 0px 0px 2px #000"
+                fade
+                indicators
+                img-width="480"
+                img-height="480"
+              >
+                <b-carousel-slide :img-src="'/api/download_image?avatar=' + user_info.avatar"></b-carousel-slide>
+              </b-carousel>
+            </div>
+            <!-- <b-img
               class="w-100"
               :src=" '/api/download_image?avatar=' + user_info.avatar"
               rounded
               alt="Rounded image"
-            ></b-img>
+            ></b-img>-->
           </b-card>
         </b-col>
         <b-col>
