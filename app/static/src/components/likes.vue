@@ -21,7 +21,7 @@
             img-height="80"
           >
             {{ like.firstname + ' ' + like.lastname }}
-            <b-button :href="'/profile/' + like.liker" variant="primary">Profile</b-button>
+            <b-button @click="$router.push('/profile/' + like.liker)" variant="primary">Profile</b-button>
             <b-button
               v-if="like.got === 0"
               @click="likeRead(like.id);"

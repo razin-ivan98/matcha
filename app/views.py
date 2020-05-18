@@ -1,4 +1,4 @@
-from flask import make_response, flash, redirect, session, request, send_from_directory
+from flask import make_response, flash, redirect, session, request, send_from_directory, send_file
 from app import app
 
 from app.filtres import Filtres
@@ -28,6 +28,10 @@ from PIL import Image
 
 import os
 
+@app.route('/')
+@app.route('/index')
+def index():
+    return send_file("static/index.html")
 
 # @app.route('/')
 # @app.route('/index', methods=['GET'])

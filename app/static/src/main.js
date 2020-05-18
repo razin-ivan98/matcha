@@ -7,7 +7,7 @@ import Vuex from 'vuex'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
-import 'es6-promise/auto';
+// import 'es6-promise/auto';
 
 import signIn from './components/signIn.vue'
 import signUp from './components/signUp.vue'

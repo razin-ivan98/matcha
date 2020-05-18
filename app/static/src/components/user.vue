@@ -31,7 +31,7 @@
 
             <b-card-text>{{ user.orientation }}</b-card-text>
 
-            <b-button :href="'/profile/' + user.name" variant="primary">Profile</b-button>
+            <b-button @click="$router.push('/profile/' + user.name)" variant="primary">Profile</b-button>
             <b-button
               @click="like(user.name); user.liked = true"
               v-if="user.liked == false"
@@ -39,7 +39,7 @@
             >Like</b-button>
             <b-button @click="unlike(user.name); user.liked = false" v-else variant="danger">Unlike</b-button>
             <b-button
-              :href="'/chat/'+user.name"
+              @click="$router.push('/chat/' + user.name)"
               variant="success"
               v-if="user.liked==true && user.liked_me==true"
             >Chat</b-button>

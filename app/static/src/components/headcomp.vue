@@ -1,23 +1,29 @@
 <template>
   <div>
     <b-navbar toggleable="lg" type="dark" variant="success" fixed="top" v-if="this.username">
-      <b-navbar-brand href="/">Matcha</b-navbar-brand>
+      <router-link to="/" tag="b-navbar-brand">Matcha</router-link>
       <b-navbar-toggle target="nav-collapse">
         <b-badge v-if="likes + dialogs > 0" variant="warning">{{ likes + dialogs }}</b-badge>
       </b-navbar-toggle>
       <b-collapse id="nav-collapse" is-nav>
         <b-navbar-nav>
-          <b-nav-item href="/settings">Settings</b-nav-item>
-          <b-nav-item href="/user">Feed</b-nav-item>
-          <b-nav-item href="/my_profile">Profile</b-nav-item>
-          <b-nav-item href="/likes">
-            Likes
-            <b-badge v-if="likes > 0" variant="warning">{{ likes }}</b-badge>
-          </b-nav-item>
-          <b-nav-item href="/chats">
+          <router-link to="/settings" tag="b-nav-item">Settings</router-link>
+          
+         <router-link to="/user" tag="b-nav-item">Feed</router-link>
+          <router-link to="/my_profile" tag="b-nav-item">Profile</router-link>
+          
+            <router-link to="/likes" tag="b-nav-item">
+              Likes
+              <b-badge v-if="likes > 0" variant="warning">{{ likes }}</b-badge>
+            </router-link>
+            
+        
+          <router-link to="/chats" tag="b-nav-item">
             Chats
             <b-badge v-if="dialogs > 0" variant="warning">{{ dialogs }}</b-badge>
-          </b-nav-item>
+          </router-link>
+            
+          
         </b-navbar-nav>
         <!-- Right aligned nav items -->
         <b-navbar-nav class="ml-auto">
@@ -78,3 +84,10 @@ export default {
   // }
 };
 </script>
+
+<style>
+router-link {
+  text-decoration: none;
+  color: #fff;
+}
+</style>
