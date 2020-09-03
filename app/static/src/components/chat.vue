@@ -192,7 +192,7 @@ export default {
 
     this.form.friend = this.username;
     let self = this;
-    axios.get("/api/get_user_info?username=" + this.username).then(
+    axios.get("/api/get_chat_with?username=" + this.username).then(
       function(response) {
         console.log(response.data);
         if (response.data.answer === true) {
@@ -204,6 +204,7 @@ export default {
             console.log("Говнищее");
           }, 2000);
         } else {
+          this.$router.push('/');
         }
       },
       function(error) {

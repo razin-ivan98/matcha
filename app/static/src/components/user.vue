@@ -31,6 +31,9 @@
 
             <b-card-text>{{ user.orientation }}</b-card-text>
 
+            <b-card-text>{{ user.location }}</b-card-text>
+
+
             <b-button @click="$router.push('/profile/' + user.name)" variant="primary">Profile</b-button>
             <b-button
               @click="like(user.name); user.liked = true"

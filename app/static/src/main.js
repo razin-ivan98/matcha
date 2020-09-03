@@ -31,7 +31,7 @@ Vue.use(Vuex)
 Vue.config.productionTip = false;
 
 var router = new VueRouter({
-  mode: 'history',
+  // mode: 'history',
   routes: [
     { name: 'index', path: '/', redirect: { name: 'user' } },
 
@@ -162,8 +162,6 @@ const store = new Vuex.Store({
             console.log('done');
             resolve(false);
           }
-
-
         }, function (error) {
           console.log(error)
         })
@@ -180,4 +178,4 @@ new Vue({
   router: router,
   store: store,
 
-}).$mount('#app')
+}).$mount('#app');

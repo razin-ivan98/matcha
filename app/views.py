@@ -8,6 +8,8 @@ from app.forms import SignUpForm
 from app.forms import InputDataForm
 from app.forms import UploadForm
 from app.forms import NewMessageForm
+from app.forms import SetGeoForm
+
 
 from app.models.posts import Posts
 from app.models.sign_in import SignIn
@@ -29,6 +31,7 @@ from PIL import Image
 import os
 
 @app.route('/')
+@app.route('/likes')
 @app.route('/index')
 def index():
     return send_file("static/index.html")
@@ -90,22 +93,24 @@ def sign_up_post():
 
 @app.route('/api/is_signed', methods=['GET'])
 def is_signed():
-    if 'signed_user' in session:
-        print('govono')
-        User().set_online(session['signed_user'])
-        return json.dumps({
-            'answer': True,
-            'username': session['signed_user']
-        })
-    else:
-        return json.dumps({
-            'answer': False
-        })
+    if not 'signed_user' in session:
+        return json.dumps({ 'answer': False })
+
+    print('govono')
+    User().set_online(session['signed_user'])
+    return json.dumps({
+        'answer': True,
+        'username': session['signed_user']
+    })
 
 @app.route('/api/sign_out', methods=['GET'])
 def sign_out():
+    if not 'signed_user' in session:
+        return json.dumps({ 'answer': False })
+    
     session.clear()
     return json.dumps({ 'answer': True })
+
 
 @app.route('/api/get_username', methods=['GET'])#optimize
 def get_username():
@@ -129,6 +134,9 @@ def get_username():
 
 @app.route('/api/input_data', methods=['POST'])
 def input_data_post():
+    if not 'signed_user' in session:
+        return json.dumps({ 'answer': False })
+
     form = InputDataForm()#validate
 
     # print(form.password.data)
@@ -150,6 +158,9 @@ def input_data_post():
 
 @app.route('/api/get_recomended_users', methods=['GET'])
 def get_recomended_users():
+    if not 'signed_user' in session:
+        return json.dumps({ 'answer': False })
+
     filtres = json.loads(request.args.get('filtres'))
     res = User().get_all_users(session['signed_user'])
 
@@ -169,12 +180,14 @@ def get_recomended_users():
 
 @app.route('/api/upload_image', methods=['POST'])
 def upload_image():
+    if not 'signed_user' in session:
+        return json.dumps({ 'answer': False })
     # form = UploadForm()#validate
     # file = form.file.data
     file = request.files['file']
     coordinates = json.loads(request.form.get('coordinates'))   
     
-    filename = secure_filename( str(datetime.datetime.now()) + file.filename)
+    filename = secure_filename( session['signed_user'] + str(datetime.datetime.now()) + file.filename )
     filepath = os.path.join(os.path.abspath('images'), filename)
 
     file.save(filepath)
@@ -191,6 +204,9 @@ def upload_image():
     
 @app.route('/api/download_image', methods=['GET'])
 def download_image():
+    if not 'signed_user' in session:
+        return json.dumps({ 'answer': False })
+
     avatar = request.args.get('avatar')
     if avatar == False:
         return False
@@ -202,6 +218,9 @@ def download_image():
 
 @app.route('/api/get_avatar', methods=['GET'])
 def get_avatar():
+    if not 'signed_user' in session:
+        return json.dumps({ 'answer': False })
+
     username = request.args.get('username')
     avatar = User().get_avatar(username)
     file = send_from_directory(os.path.abspath('images'), avatar)  
@@ -212,6 +231,9 @@ def get_avatar():
 
 @app.route('/api/get_user_info', methods=['GET'])
 def get_user_info():
+    if not 'signed_user' in session:
+        return json.dumps({ 'answer': False })
+
     username = request.args.get('username')
     user_info = User().get_user_info(username)
     User().set_online(session['signed_user'])
@@ -222,6 +244,9 @@ def get_user_info():
 
 @app.route('/api/like', methods=['GET'])
 def like():
+    if not 'signed_user' in session:
+        return json.dumps({ 'answer': False })
+
     username = request.args.get('username')
     User().set_online(session['signed_user'])
     if not (User().is_liked(session['signed_user'], username)):
@@ -232,6 +257,9 @@ def like():
 
 @app.route('/api/unlike', methods=['GET'])
 def unlike():
+    if not 'signed_user' in session:
+        return json.dumps({ 'answer': False })
+
     username = request.args.get('username')
     User().set_online(session['signed_user'])
     if (User().is_liked(session['signed_user'], username)):
@@ -241,6 +269,13 @@ def unlike():
 
 @app.route('/api/get_likes', methods=['GET'])
 def get_likes():
+    print(request.environ['REMOTE_ADDR'] + " govono")
+    print(request.remote_addr + " govono")
+
+
+    if not 'signed_user' in session:
+        return json.dumps({ 'answer': False })
+
     User().set_online(session['signed_user'])
     res = User().get_likes(session['signed_user'])
     return json.dumps({ 'answer': True,
@@ -248,6 +283,9 @@ def get_likes():
 
 @app.route('/api/like_read', methods=['GET'])
 def like_read():
+    if not 'signed_user' in session:
+        return json.dumps({ 'answer': False })
+
     User().set_online(session['signed_user'])
     like_id = request.args.get('like_id')
     User().like_read(like_id)
@@ -255,18 +293,27 @@ def like_read():
 
 @app.route('/api/get_unread_likes_count', methods=['GET'])
 def get_unread_likes_count():
+    if not 'signed_user' in session:
+        return json.dumps({ 'answer': False })
+
     User().set_online(session['signed_user'])
     res = User().get_unread_likes_count(session['signed_user'])
     return json.dumps({ 'answer': True , 'likes_count': res})
 
 @app.route('/api/get_my_chats', methods=['GET'])
 def get_my_chats():
+    if not 'signed_user' in session:
+        return json.dumps({ 'answer': False })
+
     User().set_online(session['signed_user'])
     res = Chat().get_my_chats(session['signed_user'])
     return json.dumps({ 'answer': True , 'chats': res})
 
 @app.route('/api/get_unread_dialogs_count', methods=['GET'])
 def get_unread_dialogs_count():
+    if not 'signed_user' in session:
+        return json.dumps({ 'answer': False })
+
     User().set_online(session['signed_user'])
     res = Chat().get_unread_chats(session['signed_user'])
     return json.dumps({ 'answer': True , 'dialogs_count': res})
@@ -274,6 +321,9 @@ def get_unread_dialogs_count():
 
 @app.route('/api/new_message', methods=['POST'])
 def new_message():
+    if not 'signed_user' in session:
+        return json.dumps({ 'answer': False })
+
     # message = json.loads(request.form.get('currMessage'))
     form = NewMessageForm()
     Chat().new_message(session['signed_user'], form.friend.data, form.curr_message.data)
@@ -283,6 +333,9 @@ def new_message():
 
 @app.route('/api/get_messages', methods=['GET'])
 def get_messages():
+    if not 'signed_user' in session:
+        return json.dumps({ 'answer': False })
+
     username = request.args.get('username')
     last = request.args.get('last')
     if (last == -1):
@@ -297,3 +350,22 @@ def get_messages():
     return json.dumps({ 'answer': True,
                         'messages': messages,
                         'unread': unread})
+
+@app.route('/api/set_geo', methods=['POST'])
+def set_geo():
+    if not 'signed_user' in session:
+        return json.dumps({ 'answer': False })
+
+    form = SetGeoForm()
+    User().set_geo(session['signed_user'], form.latitude.data, form.longitude.data)
+    return json.dumps({ 'answer': True })
+
+@app.route('/api/get_chat_with', methods=['POST'])
+def get_chat_with():
+    if not 'signed_user' in session:
+        return json.dumps({ 'answer': False })
+
+    form = SetGeoForm()
+    User().set_geo(session['signed_user'], form.latitude.data, form.longitude.data)
+    return json.dumps({ 'answer': True })
+                    

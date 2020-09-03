@@ -52,6 +52,8 @@ export default {
 
     updateAll() {
       var self = this;
+      if (!self.$store.username)
+        return;
       axios.get("/api/get_unread_likes_count").then(function(response) {
         if (response.data.answer === true)
           self.$store.commit("change_likes", response.data.likes_count);
@@ -105,10 +107,13 @@ export default {
 
   mounted() {
     this.updateAll();
-    setInterval(() => {
+    this.updateAllInterval = setInterval(() => {
       this.updateAll();
     }, 5000);
-  }
+  },
+  beforeDestroy() {
+    clearInterval(this.updateAllInterval)
+  },
 };
 </script>
 

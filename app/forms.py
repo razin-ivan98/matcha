@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
-from wtforms import StringField, PasswordField, SubmitField, SelectField
+from wtforms import StringField, PasswordField, SubmitField, SelectField, FloatField
 from wtforms.validators import DataRequired, Length
 from flask_uploads import UploadSet, IMAGES
 
@@ -41,4 +41,8 @@ class UploadForm(FlaskForm):
         FileRequired(),
         FileAllowed(images, 'Images only!')
     ])
+
+class SetGeoForm(FlaskForm):
+    latitude = FloatField()
+    longitude = FloatField()
 

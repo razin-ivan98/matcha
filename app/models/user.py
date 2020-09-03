@@ -2,6 +2,9 @@ from app.models.model import Model
 from flask import send_from_directory
 import os
 
+import requests
+import json
+
 class User(Model):
     def is_confirmed(self, login):
         cursor = self.db.cursor()
@@ -94,3 +97,10 @@ class User(Model):
         cursor = self.db.cursor()
         params = (user,)
         cursor.execute("UPDATE users SET online=NOW() WHERE name=%s", params)
+
+    def set_geo(self, user, latitude, longitude):
+        cursor = self.db.cursor()
+        res = requests.get("https://geocode-maps.yandex.ru/1.x/?apikey=abd98dea-8721-4425-be8a-398bb9fbab30&format=json&geocode=%f,%f" % (longitude, latitude))
+        location = (json.loads(res.content)['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['metaDataProperty']['GeocoderMetaData']['text'])
+        params = (latitude, longitude, location, user,)
+        cursor.execute("UPDATE users SET latitude=%s, longitude=%s, location=%s WHERE name=%s", params)

@@ -87,3 +87,7 @@ class Chat(Model):
             return 0
         else:
             return res[0]['unread']
+    
+    def get_chat_with(self, signedUser, user):
+        cursor = self.db.cursor(dictionary=True)
+
