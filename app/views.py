@@ -9,6 +9,10 @@ from app.forms import InputDataForm
 from app.forms import UploadForm
 from app.forms import NewMessageForm
 from app.forms import SetGeoForm
+from app.forms import ChangePassForm
+from app.forms import PasswordRecoveryForm
+
+
 
 
 from app.models.posts import Posts
@@ -27,6 +31,8 @@ import datetime
 import json
 
 from PIL import Image
+
+from math import ceil
 
 import os
 
@@ -162,7 +168,10 @@ def get_recomended_users():
         return json.dumps({ 'answer': False })
 
     filtres = json.loads(request.args.get('filtres'))
+    page = json.loads(request.args.get('page'))
     res = User().get_all_users(session['signed_user'])
+
+    perPage = 2
 
     if filtres['show'] == 'likers':
         res = list(filter(Filtres().likers_filter, res))
@@ -173,8 +182,10 @@ def get_recomended_users():
     elif filtres['show'] == 'custom':
         res = Filtres().orientation_filter(res, filtres['orientation'])
         res = Filtres().gender_filter(res, filtres['gender'])
+    pages = ceil(len(res) / 2)
+    res = res[2 * (page - 1) : 2 * (page - 1) + 2]
     User().set_online(session['signed_user'])
-    return json.dumps({ 'answer': True , 'users': res})
+    return json.dumps({ 'answer': True , 'users': res, 'pages': pages})
 
 
 
@@ -357,15 +368,73 @@ def set_geo():
         return json.dumps({ 'answer': False })
 
     form = SetGeoForm()
-    User().set_geo(session['signed_user'], form.latitude.data, form.longitude.data)
+    if request.headers.getlist("X-Forwarded-For"):
+        ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        ip = request.remote_addr
+    User().set_geo(session['signed_user'], form.latitude.data, form.longitude.data, ip)
     return json.dumps({ 'answer': True })
 
-@app.route('/api/get_chat_with', methods=['POST'])
+@app.route('/api/get_chat_with', methods=['GET'])
 def get_chat_with():
     if not 'signed_user' in session:
         return json.dumps({ 'answer': False })
+    user = request.args.get('username')
 
-    form = SetGeoForm()
-    User().set_geo(session['signed_user'], form.latitude.data, form.longitude.data)
-    return json.dumps({ 'answer': True })
+    res = Chat().get_chat_with(session['signed_user'], user)
+    if res == False:
+        return json.dumps({ 'answer': False }), 404
+    return json.dumps({ 'answer': True,
+                        'user_info': res })
                     
+@app.route('/api/password_recovery/get', methods=['GET'])
+def password_recovery_order():
+    if 'signed_user' in session:
+        return json.dumps({ 'answer': False })
+    user = request.args.get('username')
+
+    res = User().password_recovery_order(user)
+    if res == False:
+        return json.dumps({ 'answer': False })
+    return json.dumps({ 'answer': True, })
+
+@app.route('/api/change_pass', methods=['POST'])
+def change_pass():
+    if not 'signed_user' in session:
+        return json.dumps({ 'answer': False })
+
+    form = ChangePassForm()
+
+    old = form.oldPass.data
+    new = form.newPass.data
+    repeat = form.repeatPass.data
+
+    if not new == repeat:
+        return json.dumps({ 'answer': False })
+    
+    res = User().change_pass(session['signed_user'], old, new)
+
+    return json.dumps({ 'answer': res })
+    
+@app.route('/api/password_recovery/change', methods=['POST'])
+def password_recovery():
+    if 'signed_user' in session:
+        return json.dumps({ 'answer': False })
+
+    form = PasswordRecoveryForm()
+
+    id = form.id.data
+    old = form.oldPass.data
+    new = form.newPass.data
+    repeat = form.repeatPass.data
+
+    if not new == repeat:
+        return json.dumps({ 'answer': False })
+    
+    username = User().get_user_by_password_id(id)
+    if username == False:
+        return json.dumps({ 'answer': False })
+    res = User().change_pass(username, old, new)
+
+    return json.dumps({ 'answer': res })
+    

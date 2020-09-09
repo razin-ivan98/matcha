@@ -4,6 +4,15 @@ import os
 
 import requests
 import json
+import hashlib
+
+import random
+
+import string
+
+from flask_mail import Message
+from app import mail
+
 
 class User(Model):
     def is_confirmed(self, login):
@@ -23,7 +32,7 @@ class User(Model):
     def get_all_users(self, login):
         cursor = self.db.cursor(dictionary=True)
         params = (login,)
-        cursor.execute("SELECT * FROM users WHERE name != %s", params)
+        cursor.execute("SELECT * FROM users WHERE (name != %s)", params)
         res = cursor.fetchall()
         for user in res:
             del user['password']
@@ -98,9 +107,73 @@ class User(Model):
         params = (user,)
         cursor.execute("UPDATE users SET online=NOW() WHERE name=%s", params)
 
-    def set_geo(self, user, latitude, longitude):
+    def set_geo(self, user, latitude, longitude, ip):
         cursor = self.db.cursor()
+        if (latitude == 9999.0):
+            res = requests.get("http://api.ipstack.com/%s?access_key=a22621fd5bacdd1cbeade8f719822457" % (ip,))
+            res = json.loads(res.content)
+            if ('type' in res and res['type'] == None) or ('success' in res and res['success'] == False):
+                latitude = 55.755241
+                longitude = 37.617779
+            else:
+                latitude = res.latitude
+                longitude = res.longitude
         res = requests.get("https://geocode-maps.yandex.ru/1.x/?apikey=abd98dea-8721-4425-be8a-398bb9fbab30&format=json&geocode=%f,%f" % (longitude, latitude))
-        location = (json.loads(res.content)['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['metaDataProperty']['GeocoderMetaData']['text'])
-        params = (latitude, longitude, location, user,)
+        res = json.loads(res.content)
+        if ('error' in res or res["response"]["GeoObjectCollection"]["metaDataProperty"]["GeocoderResponseMetaData"]["found"] == "0"):
+            params = (55.755241, 37.617779, "Россия, Москва, Красная площадь, 1", user,)
+        else:
+            location = (res['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['metaDataProperty']['GeocoderMetaData']['text'])
+            params = (latitude, longitude, location, user,)
         cursor.execute("UPDATE users SET latitude=%s, longitude=%s, location=%s WHERE name=%s", params)
+
+    def password_recovery_order(self, user):
+        cursor = self.db.cursor()
+        params = (user, )
+        cursor.execute("SELECT * FROM users WHERE name=%s", params)
+        res = cursor.fetchall()
+        if (cursor.rowcount == 0):
+            return False
+        cursor.execute("SELECT * FROM password_recovery WHERE user=%s", params)
+        res = cursor.fetchall()
+        if (cursor.rowcount > 0):
+            cursor.execute("DELETE FROM password_recovery WHERE user=%s", params)
+        flag = True
+        while flag:
+            id = "".join(random.choice(string.ascii_letters) for i in range(32))
+            params = (id, )
+            cursor.execute("SELECT * FROM password_recovery WHERE id=%s", params)
+            cursor.fetchall()
+            if (cursor.rowcount == 0):
+                flag = False
+
+        params = (user, id,)
+        cursor.execute("INSERT INTO password_recovery (user, id, date) VALUES (%s, %s, NOW())", params)
+        msg = Message('Link for password recovery', sender='razin-ivan98@ya.ru', recipients=['razin-ivan98@ya.ru'])
+        msg.body = 'Password Recovery'
+        msg.html = '<h1>Password recovery</h1><a href="http://localhost:8080/#/password_recovery/%s">Link</a>' % (id,)
+        mail.send(msg)
+        return True
+
+    def change_pass(self, user, old, new):
+        cursor = self.db.cursor()
+        params = (user, hashlib.sha3_512(old.encode('utf-8')).hexdigest(),)
+        cursor.execute("SELECT name FROM users WHERE name = %s AND password = %s", params)
+        res = cursor.fetchall()
+        if cursor.rowcount == 0:  
+            return False
+        params = (hashlib.sha3_512(new.encode('utf-8')).hexdigest(), user)
+        cursor.execute("UPDATE users SET password = %s WHERE name = %s", params)
+        return True
+        
+    def get_user_by_password_id(self, id):
+        cursor = self.db.cursor()
+        params = (id,)
+        cursor.execute("SELECT user FROM password_recovery WHERE id = %s", params)
+        res = cursor.fetchall()
+        if (cursor.rowcount == 0):
+            return False
+        return res[0][0]
+        
+            
+        

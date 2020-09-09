@@ -46,3 +46,13 @@ class SetGeoForm(FlaskForm):
     latitude = FloatField()
     longitude = FloatField()
 
+class ChangePassForm(FlaskForm):
+    oldPass = PasswordField('password', [DataRequired()])
+    newPass = PasswordField('password', [DataRequired()])
+    repeatPass = PasswordField('password', [DataRequired()])
+
+class PasswordRecoveryForm(FlaskForm):
+    id = StringField('id', [DataRequired(), Length(max=64)])
+    oldPass = PasswordField('password', [DataRequired()])
+    newPass = PasswordField('password', [DataRequired()])
+    repeatPass = PasswordField('password', [DataRequired()])

@@ -4,7 +4,7 @@
 
     <div style="height: 50px"></div>
 
-    <div class="text-center" v-if="status=='request'">
+    <div class="text-center" v-if="status == 'request'">
       <b-spinner
         variant="success"
         style="width: 3rem; height: 3rem;"
@@ -15,7 +15,7 @@
 
     <router-view
       class="mt-3"
-      v-if="status=='ready'"
+      v-if="status == 'ready'"
       @signed-in="onSigning"
       @signed-out="onSigningOut"
     ></router-view>
@@ -52,8 +52,7 @@ export default {
 
     updateAll() {
       var self = this;
-      if (!self.$store.username)
-        return;
+      if (!self.$store.getters.username) return;
       axios.get("/api/get_unread_likes_count").then(function(response) {
         if (response.data.answer === true)
           self.$store.commit("change_likes", response.data.likes_count);
@@ -112,8 +111,8 @@ export default {
     }, 5000);
   },
   beforeDestroy() {
-    clearInterval(this.updateAllInterval)
-  },
+    clearInterval(this.updateAllInterval);
+  }
 };
 </script>
 

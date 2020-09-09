@@ -11,7 +11,9 @@
 
     <div v-if="waiting === false">
       <b-container>
-        <b-card style="height:calc(100vh - 5rem);display: block;flex-direction:unset;">
+        <b-card
+          style="height:calc(100vh - 5rem);display: block;flex-direction:unset;"
+        >
           <b-card
             :img-src="'/api/get_avatar?username=' + this.friend.name"
             img-left
@@ -21,9 +23,7 @@
           >
             {{ friend.firstname + " " + friend.lastname }}
             <b-card-text style="float:right;">
-              {{
-              "Был в сети " + get_online(friend.online)
-              }}
+              {{ "Был в сети " + get_online(friend.online) }}
             </b-card-text>
             <!-- <span
                 style="float:right;"
@@ -52,9 +52,7 @@
             >
               {{ message.message }}
               <b-card-text style="min-width: 0px;float:right; color: green;">
-                {{
-                mom(message.date, "DD-MM-YYYY hh:mm:ss")
-                }}
+                {{ mom(message.date, "DD-MM-YYYY hh:mm:ss") }}
               </b-card-text>
             </b-card>
           </b-card>
@@ -71,7 +69,8 @@
                 @click="sendMessage()"
                 style="width: 15%;float: left;"
                 variant="success"
-              >&#10145;</b-button>
+                >&#10145;</b-button
+              >
             </b-form>
           </b-card>
         </b-card>
@@ -90,6 +89,7 @@ export default {
 
   data() {
     return {
+      username: this.$route.params.username,
       unread: null,
       waiting: true,
       friend: null,
@@ -101,9 +101,9 @@ export default {
     };
   },
 
-  computed: {
-    username() {
-      return this.$route.params.username;
+  watch: {
+    $route(to, from) {
+      this.username = this.$route.params.username;
     }
   },
 
@@ -188,7 +188,7 @@ export default {
     }
   },
   mounted() {
-    moment.locale("ru");
+    //moment.locale("ru");
 
     this.form.friend = this.username;
     let self = this;
@@ -204,7 +204,7 @@ export default {
             console.log("Говнищее");
           }, 2000);
         } else {
-          this.$router.push('/');
+          //$router.push('/');
         }
       },
       function(error) {

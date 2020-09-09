@@ -15,19 +15,24 @@
           <b-card
             v-for="(like, key) in likes"
             :key="key"
-            :img-src=" '/api/get_avatar?username=' + like.liker"
+            :img-src="'/api/get_avatar?username=' + like.liker"
             img-left
             img-width="80"
             img-height="80"
           >
-            {{ like.firstname + ' ' + like.lastname }}
-            <b-button @click="$router.push('/profile/' + like.liker)" variant="primary">Profile</b-button>
+            {{ like.firstname + " " + like.lastname }}
+            <b-button
+              @click="$router.push('/profile/' + like.liker)"
+              variant="primary"
+              >Profile</b-button
+            >
             <b-button
               v-if="like.got === 0"
-              @click="likeRead(like.id);"
+              @click="likeRead(like.id)"
               style="position: inline block"
               variant="success"
-            >Got it</b-button>
+              >Got it</b-button
+            >
           </b-card>
         </b-card>
       </b-container>
@@ -43,6 +48,7 @@ export default {
 
   data() {
     return {
+      interval: null,
       waiting: true,
       likes: []
     };
@@ -69,10 +75,14 @@ export default {
   },
   computed: {},
   mounted() {
+    const self = this;
     this.getLikes();
-    setInterval(() => {
-      this.getLikes();
+    this.interval = setInterval(() => {
+      self.getLikes();
     }, 5000);
+  },
+  beforeDestroy() {
+    clearInterval(this.interval);
   }
 };
 </script>

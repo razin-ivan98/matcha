@@ -90,4 +90,11 @@ class Chat(Model):
     
     def get_chat_with(self, signedUser, user):
         cursor = self.db.cursor(dictionary=True)
+        params = (signedUser, user, user, signedUser)
+        cursor.execute("SELECT * FROM dialogs WHERE ((friend_1=%s AND friend_2=%s) OR (friend_1=%s AND friend_2=%s))", params)
+        res = cursor.fetchall()
+        if (len(res) == 0):
+            return False
+        return User().get_user_info(user)
+
 
