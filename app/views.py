@@ -106,6 +106,8 @@ def sign_up_post():
 def is_signed():
     if not 'signed_user' in session:
         return json.dumps({ 'answer': False })
+    if session['registration_ended'] == 0:
+        return rjson.dumps({ 'answer': False })
 
     #print('govono')
     User().set_online(session['signed_user'])
@@ -264,6 +266,8 @@ def get_user_info():
 def like():
     if not 'signed_user' in session:
         return json.dumps({ 'answer': False })
+    if session['registration_ended'] == 0:
+        return rjson.dumps({ 'answer': False })
 
     username = request.args.get('username')
     User().set_online(session['signed_user'])
@@ -277,6 +281,8 @@ def like():
 def unlike():
     if not 'signed_user' in session:
         return json.dumps({ 'answer': False })
+    if session['registration_ended'] == 0:
+        return rjson.dumps({ 'answer': False })
 
     username = request.args.get('username')
     User().set_online(session['signed_user'])
@@ -287,12 +293,10 @@ def unlike():
 
 @app.route('/api/get_likes', methods=['GET'])
 def get_likes():
-    print(request.environ['REMOTE_ADDR'] + " govono")
-    print(request.remote_addr + " govono")
-
-
     if not 'signed_user' in session:
         return json.dumps({ 'answer': False })
+    if session['registration_ended'] == 0:
+        return rjson.dumps({ 'answer': False })
 
     User().set_online(session['signed_user'])
     res = User().get_likes(session['signed_user'])
@@ -303,6 +307,8 @@ def get_likes():
 def like_read():
     if not 'signed_user' in session:
         return json.dumps({ 'answer': False })
+    if session['registration_ended'] == 0:
+        return rjson.dumps({ 'answer': False })
 
     User().set_online(session['signed_user'])
     like_id = request.args.get('like_id')
@@ -313,6 +319,8 @@ def like_read():
 def get_unread_likes_count():
     if not 'signed_user' in session:
         return json.dumps({ 'answer': False })
+    if session['registration_ended'] == 0:
+        return rjson.dumps({ 'answer': False })
 
     User().set_online(session['signed_user'])
     res = User().get_unread_likes_count(session['signed_user'])
@@ -322,6 +330,8 @@ def get_unread_likes_count():
 def get_my_chats():
     if not 'signed_user' in session:
         return json.dumps({ 'answer': False })
+    if session['registration_ended'] == 0:
+        return rjson.dumps({ 'answer': False })
 
     User().set_online(session['signed_user'])
     res = Chat().get_my_chats(session['signed_user'])
@@ -341,6 +351,8 @@ def get_unread_dialogs_count():
 def new_message():
     if not 'signed_user' in session:
         return json.dumps({ 'answer': False })
+    if session['registration_ended'] == 0:
+        return rjson.dumps({ 'answer': False })
 
     # message = json.loads(request.form.get('currMessage'))
     form = NewMessageForm()
@@ -353,6 +365,8 @@ def new_message():
 def get_messages():
     if not 'signed_user' in session:
         return json.dumps({ 'answer': False })
+    if session['registration_ended'] == 0:
+        return rjson.dumps({ 'answer': False })
 
     username = request.args.get('username')
     last = request.args.get('last')
@@ -386,6 +400,9 @@ def set_geo():
 def get_chat_with():
     if not 'signed_user' in session:
         return json.dumps({ 'answer': False })
+    if session['registration_ended'] == 0:
+        return rjson.dumps({ 'answer': False })
+        
     user = request.args.get('username')
 
     res = Chat().get_chat_with(session['signed_user'], user)
