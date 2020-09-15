@@ -60,7 +60,8 @@ export default {
   data() {
     return {
       waiting: false,
-      chats: []
+      chats: [],
+      interId: null
     };
   },
 
@@ -81,9 +82,15 @@ export default {
     }
   },
   mounted() {
+    const self = this;
+    self.getMyChats();
     moment.locale("ru");
-    this.getMyChats();
+    self.interId = setInterval(self.getMyChats, 4000);
+
     console.log(this.chats, "chats");
+  },
+  beforeDestroy() {
+    clearInterval(this.interId);
   }
 };
 </script>

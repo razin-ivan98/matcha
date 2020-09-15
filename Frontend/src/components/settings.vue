@@ -1,10 +1,6 @@
 <template>
   <div>
-    <b-card
-      title="Settings"
-      style="max-width: 50rem;"
-      class="mb-2 mt-5 mx-auto"
-    >
+    <b-card title="Settings" style="max-width: 50rem;" class="mt-5 mx-auto">
       <b-tabs content-class="mt-3">
         <b-tab :active="this.activeTab === 1" title="Data">
           <b-form @submit.prevent="onDataSubmit">
@@ -77,22 +73,77 @@
                       required
                     ></b-form-select>
                   </b-form-group>
+                  <b-form-group
+                    id="input-group-8"
+                    label="Interests:"
+                    label-for="input-8"
+                  >
+                    <b-form-tags
+                      input-id="input-8"
+                      v-model="interests"
+                      class="mb-2"
+                    ></b-form-tags>
+                  </b-form-group>
                 </b-col>
               </b-row>
             </b-container>
-
-            <b-button type="submit" variant="primary">Submit</b-button>
-            <b-button type="reset" variant="danger">Reset</b-button>
+            <p>
+              <b-button type="submit" variant="primary">Submit</b-button>
+              <b-button type="reset" variant="danger">Reset</b-button>
+            </p>
           </b-form>
         </b-tab>
-        <b-tab title="Images" :active="this.activeTab === 2">
-          <b-form @submit.prevent="onNewImageSubmit">
+        <b-tab title="Bio" :active="this.activeTab === 2">
+          <b-form @submit.prevent="onBioSubmit">
+            <b-form-group>
+              <b-form-textarea
+                id="textarea"
+                v-model="bioForm.text"
+                placeholder="Enter your biography..."
+                rows="3"
+                max-rows="6"
+              ></b-form-textarea>
+            </b-form-group>
+            <p>
+              <b-button type="submit" variant="primary">Submit</b-button>
+              <b-button type="reset" variant="danger">Reset</b-button>
+            </p>
+          </b-form>
+        </b-tab>
+        <b-tab title="Images" :active="this.activeTab === 3">
+          <div>
+            <b-container>
+              <b-row>
+                <b-card
+                  v-for="im in images"
+                  :key="im.id"
+                  :img-src="'/api/download_image?avatar=' + im.url"
+                  img-alt="Image"
+                  img-top
+                  tag="article"
+                  style="width: 15rem; display: inline-block"
+                  class="mx-auto mb-2"
+                >
+                  <b-button @click="setAsAvatar(im.id)" variant="primary">
+                    Set Avatar
+                  </b-button>
+                  <b-button @click="deleteImage(im.id)" variant="danger">
+                    Delete
+                  </b-button>
+                </b-card>
+              </b-row>
+            </b-container>
+          </div>
+          <b-form
+            @submit.prevent="onNewImageSubmit"
+            @reset.prevent="onImageReset"
+          >
             <b-form-group id="input-group-1">
               <b-form-file
                 @input="onNewImageInput"
                 v-model="fileForm.file"
                 :state="Boolean(fileForm.file)"
-                placeholder="Choose a file or drop it here..."
+                placeholder="Add new Image"
                 drop-placeholder="Drop file here..."
               ></b-form-file>
             </b-form-group>
@@ -103,21 +154,17 @@
             </b-form-group>
           </b-form>
 
-          <cropper
-            ref="cropper"
+          <clipper-basic
+            ref="clipper"
             v-if="this.image != null"
-            class="cropper"
             :src="this.image"
-            :stencilProps="{
-              aspectRatio: 10 / 10
-            }"
-            @change="change"
-          ></cropper>
+            :ratio="1"
+          ></clipper-basic>
         </b-tab>
-        <b-tab title="Map" :active="this.activeTab === 3">
+        <b-tab title="Map" :active="this.activeTab === 4">
           <div>
             <yandex-map
-              style="width: 100%; height: 60vh;"
+              style="width: 100%; height: 50vh;"
               :coords="this.mark || [55.755241123, 37.61777976876]"
               :settings="{
                 apiKey: 'abd98dea-8721-4425-be8a-398bb9fbab30',
@@ -140,10 +187,12 @@
               />
             </yandex-map>
           </div>
-          <b-button @click="onMapSubmit" variant="primary">Submit</b-button>
-          <b-button @click="onMapDenial" variant="warning">Не скажу</b-button>
+          <p>
+            <b-button @click="onMapSubmit" variant="primary">Submit</b-button>
+            <b-button @click="onMapDenial" variant="warning">Не скажу</b-button>
+          </p>
         </b-tab>
-        <b-tab title="Password" :active="this.activeTab === 4">
+        <b-tab title="Password" :active="this.activeTab === 5">
           <b-form @submit.prevent="onPassSubmit">
             <b-form-group
               id="pass-group-1"
@@ -182,24 +231,40 @@
                 placeholder="Repeat new password"
               ></b-form-input
             ></b-form-group>
-            <b-button type="submit" variant="primary">Submit</b-button>
-            <b-button type="reset" variant="danger">Reset</b-button>
+            <p>
+              <b-button type="submit" variant="primary">Submit</b-button>
+              <b-button type="reset" variant="danger">Reset</b-button>
+            </p>
           </b-form>
         </b-tab>
       </b-tabs>
+      <b-alert
+        :show="dismissCountDown"
+        dismissible
+        fade
+        :variant="variant"
+        @dismiss-count-down="countDownChanged"
+      >
+        {{ text }}
+      </b-alert>
     </b-card>
   </div>
 </template>
 
 <script>
 import axios from "axios";
-import { Cropper } from "vue-advanced-cropper";
+import { clipperBasic } from "vuejs-clipper";
 import { yandexMap, ymapMarker } from "vue-yandex-maps";
-import input_data from "./input_data";
 
 export default {
   data() {
     return {
+      variant: "danger",
+      dismissSecs: 5,
+      dismissCountDown: 0,
+      showDismissibleAlert: false,
+      text: "",
+
       activeTab: 1,
 
       mark: [
@@ -217,6 +282,7 @@ export default {
         orientation: this.$store.getters.user_info.orientation,
         email: this.$store.getters.user_info.email
       },
+      interests: this.$store.getters.user_info.interests,
       dataSet: {
         genders: [
           { text: "Select One", value: null },
@@ -233,6 +299,9 @@ export default {
           "Pidor"
         ]
       },
+      bioForm: {
+        text: this.$store.getters.user_info.biography
+      },
       passForm: {
         oldPass: "",
         newPass: "",
@@ -247,21 +316,36 @@ export default {
     };
   },
 
-  components: { Cropper, input_data, yandexMap, ymapMarker },
-
+  components: { clipperBasic, yandexMap, ymapMarker },
+  computed: {
+    images() {
+      return this.$store.getters.user_info.images;
+    }
+  },
   methods: {
-    crop() {
-      const { coordinates, canvas } = this.$refs.cropper.getResult();
-      this.coordinates = coordinates;
-    },
     onDataSubmit() {
       var self = this;
-      axios.post("/api/change_data", this.dataForm).then(
+      const frm = { ...this.dataForm };
+      frm.interests = JSON.stringify(this.interests);
+      axios.post("/api/input_data", frm).then(
         function(response) {
-          console.log(response);
+          if (response.data.answer) self.showAlert("success", "Success");
+          else self.showAlert("danger", "Error");
         },
         function(error) {
-          console.log(error);
+          self.showAlert("danger", "Error");
+        }
+      );
+    },
+    onBioSubmit() {
+      var self = this;
+      axios.post("/api/change_bio", this.bioForm).then(
+        function(response) {
+          if (response.data.answer) self.showAlert("success", "Success");
+          else self.showAlert("danger", "Error");
+        },
+        function(error) {
+          self.showAlert("danger", "Error");
         }
       );
     },
@@ -269,10 +353,11 @@ export default {
       var self = this;
       axios.post("/api/change_pass", this.passForm).then(
         function(response) {
-          console.log(response);
+          if (response.data.answer) self.showAlert("success", "Success");
+          else self.showAlert("danger", "Error");
         },
         function(error) {
-          console.log(error);
+          self.showAlert("danger", "Error");
         }
       );
     },
@@ -285,27 +370,60 @@ export default {
       var self = this;
       reader.onloadend = function() {
         self.image = reader.result;
-        console.log(self.image);
       };
 
       if (this.fileForm.file) {
         reader.readAsDataURL(this.fileForm.file);
-        console.log("readed");
       } else {
         this.image = "";
       }
     },
-    change({ coordinates, canvas }) {
-      console.log(coordinates, canvas);
+    onImageReset() {
+      this.fileForm.file = null;
+      this.image = null;
     },
+
+    deleteImage(id) {
+      const self = this;
+      axios.get("/api/delete_image?id=" + id).then(
+        function(response) {
+          self.$store.dispatch("isSigned");
+          if (response.data.answer) self.showAlert("success", "Success");
+          else self.showAlert("danger", "Error");
+        },
+        function(error) {
+          self.showAlert("danger", "Error");
+        }
+      );
+    },
+    setAsAvatar(id) {
+      axios.get("/api/set_avatar?id=" + id).then(
+        function(response) {
+          if (response.data.answer) self.showAlert("success", "Success");
+          else self.showAlert("danger", "Error");
+        },
+        function(error) {
+          self.showAlert("danger", "Error");
+        }
+      );
+    },
+
     onNewImageSubmit() {
       const self = this;
-      this.crop();
-      alert(this.coordinates.width);
+
+      const data = this.$refs.clipper.getDrawPos().pos;
+
+      this.coordinates = {
+        width: data.dwidth,
+        height: data.dheight,
+        left: data.sx,
+        top: data.sy
+      };
+
       var forme = new FormData();
       forme.append("file", this.fileForm.file);
       forme.append("coordinates", JSON.stringify(this.coordinates));
-      // alert(this.form.file);
+
       axios
         .post("/api/upload_image", forme, {
           headers: {
@@ -314,14 +432,13 @@ export default {
         })
         .then(
           function(response) {
-            console.log(response);
-            alert(response.data.answer);
-            self.fileForm.file = null;
-            self.image = null;
-            self.activeTab = 3;
+            if (response.data.answer) self.showAlert("success", "Success");
+            else self.showAlert("danger", "Error");
+            self.onImageReset();
+            self.$store.dispatch("isSigned");
           },
           function(error) {
-            console.log(error);
+            self.showAlert("danger", "Error");
           }
         );
     },
@@ -338,17 +455,16 @@ export default {
         })
         .then(
           function(response) {
-            console.log(response);
-            alert(response.data.answer);
-            //self.mark = null;
-            self.activeTab = 3;
+            if (response.data.answer) self.showAlert("success", "Success");
+            else self.showAlert("danger", "Error");
           },
           function(error) {
-            console.log(error);
+            self.showAlert("danger", "Error");
           }
         );
     },
     onMapDenial() {
+      const self = this;
       axios
         .post("/api/set_geo", {
           latitude: 9999.0,
@@ -356,15 +472,23 @@ export default {
         })
         .then(
           function(response) {
-            console.log(response);
-            alert(response.data.answer);
+            if (response.data.answer) self.showAlert("success", "Success");
+            else self.showAlert("danger", "Error");
             self.mark = null;
-            self.activeTab = 3;
           },
           function(error) {
-            console.log(error);
+            self.showAlert("danger", "Error");
           }
         );
+    },
+    countDownChanged(dismissCountDown) {
+      this.dismissCountDown = dismissCountDown;
+    },
+    showAlert(variant, text) {
+      this.variant = variant;
+      this.text = text;
+
+      this.dismissCountDown = this.dismissSecs;
     }
   }
 };

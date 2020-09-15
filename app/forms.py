@@ -33,6 +33,7 @@ class InputDataForm(FlaskForm):
         ('Gomosexual', 'Gomosexual'),
         ('Pidor', 'Pidor')
     ])
+    interests = StringField('interests', [Length(max=1024)])
 
 images = UploadSet('images', IMAGES)
 
@@ -56,3 +57,6 @@ class PasswordRecoveryForm(FlaskForm):
     oldPass = PasswordField('password', [DataRequired()])
     newPass = PasswordField('password', [DataRequired()])
     repeatPass = PasswordField('password', [DataRequired()])
+
+class BioForm(FlaskForm):
+    text = StringField('text', [Length(max=4096)])

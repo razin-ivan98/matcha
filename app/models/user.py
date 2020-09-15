@@ -36,15 +36,35 @@ class User(Model):
         res = cursor.fetchall()
         for user in res:
             del user['password']
+            del user['email']
             user['liked'] = self.is_liked(login, user['name'])
             user['liked_me'] = self.is_liked(user['name'], login)
             user['online'] = user['online'].strftime("%d-%m-%Y %H:%M:%S")
+
+            del user['image1']
+            del user['image2']
+            del user['image3']
+            del user['image4']
+            del user['image5']
         return (res)
 
     def upload_image(self, filename, login):
-        cursor = self.db.cursor()
+        cursor = self.db.cursor(dictionary=True)
+        params = (login, )
+        cursor.execute("SELECT * FROM users WHERE name=%s", params)
+        res = cursor.fetchall()
         params = (filename, login,)
-        cursor.execute("UPDATE users SET avatar=%s WHERE name=%s", params)
+        i = 1
+        while (i < 6):
+            if res[0]['image' + str(i)] == None:
+                cursor.execute("UPDATE users SET image%s" % (str(i)) + "=%s WHERE name=%s", params)
+                break
+            i += 1
+            if i == 6:
+                return False
+        cursor.execute("UPDATE users SET register_image=1, avatar=%s WHERE name=%s", params)
+        return True
+
 
     def get_avatar(self, login):
         cursor = self.db.cursor()
@@ -60,6 +80,19 @@ class User(Model):
         res = cursor.fetchall()[0]
         del res['password']
         res['online'] = res['online'].strftime("%d-%m-%Y %H:%M:%S")
+        res['images'] = [item for item in[
+            {'url': res['image1'], 'id': 1},
+            {'url': res['image2'], 'id': 2},
+            {'url': res['image3'], 'id': 3},
+            {'url': res['image4'], 'id': 4},
+            {'url': res['image5'], 'id': 5},
+        ] if item['url'] ]
+
+        del res['image1']
+        del res['image2']
+        del res['image3']
+        del res['image4']
+        del res['image5']
         return res
         
     def is_liked(self, liker, liked):
@@ -125,7 +158,7 @@ class User(Model):
         else:
             location = (res['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['metaDataProperty']['GeocoderMetaData']['text'])
             params = (latitude, longitude, location, user,)
-        cursor.execute("UPDATE users SET latitude=%s, longitude=%s, location=%s WHERE name=%s", params)
+        cursor.execute("UPDATE users SET register_geo=1, latitude=%s, longitude=%s, location=%s WHERE name=%s", params)
 
     def password_recovery_order(self, user):
         cursor = self.db.cursor()
@@ -151,7 +184,7 @@ class User(Model):
         cursor.execute("INSERT INTO password_recovery (user, id, date) VALUES (%s, %s, NOW())", params)
         msg = Message('Link for password recovery', sender='razin-ivan98@ya.ru', recipients=['razin-ivan98@ya.ru'])
         msg.body = 'Password Recovery'
-        msg.html = '<h1>Password recovery</h1><a href="http://localhost:8080/#/password_recovery/%s">Link</a>' % (id,)
+        msg.html = '<h1>Password recovery for %s</h1><a href="http://localhost:8080/#/password_recovery/%s">Link</a>' % (user, id,)
         mail.send(msg)
         return True
 
@@ -175,5 +208,41 @@ class User(Model):
             return False
         return res[0][0]
         
-            
+    def delete_image(self, user, id):
+        if int(id) < 1 or int(id) > 5:
+            return False
+        cursor = self.db.cursor()
+        params = (user,)
         
+        cursor.execute("UPDATE users SET image%s " % (id) + "=Null WHERE name = %s", params)
+        return True
+    
+    def set_avatar(self, user, id):
+        if int(id) < 1 or int(id) > 5:
+            return False
+        cursor = self.db.cursor()
+        params = (user,)
+        
+        cursor.execute("SELECT image%s from users" % (id) + " WHERE name = %s", params)
+        res = cursor.fetchall()
+        params = (res[0][0], user,)
+        cursor.execute("UPDATE users SET avatar = %s WHERE name = %s", params)
+
+        return True
+
+    def change_bio(self, user, bio):
+        cursor = self.db.cursor()
+        params = (bio, user)
+        
+        cursor.execute("UPDATE users SET biography = %s WHERE name = %s", params)
+
+        return True
+
+    def end_registration(self, user):
+        cursor = self.db.cursor()
+        params = (user,)
+        cursor.execute("SELECT * FROM users WHERE register_data=1 AND register_image=1 AND register_geo=1 AND name=%s", params)
+        cursor.fetchall()
+        if (cursor.rowcount == 0):
+            return False
+        return True

@@ -11,6 +11,8 @@ from app.forms import NewMessageForm
 from app.forms import SetGeoForm
 from app.forms import ChangePassForm
 from app.forms import PasswordRecoveryForm
+from app.forms import BioForm
+
 
 
 
@@ -40,6 +42,8 @@ import os
 @app.route('/likes')
 @app.route('/index')
 def index():
+    if 'signed_user' in session and session['registration_ended'] == 0:
+        return redirect("/#/input_data", 302)
     return send_file("static/index.html")
 
 # @app.route('/')
@@ -72,6 +76,7 @@ def sign_in_post():
         print (res)
         if res['answer'] == True:
             session['signed_user'] = res['username']
+            session['registration_ended'] = res['registration_ended']
             User().set_online(session['signed_user'])
     else:
         res = {'answer': False}
@@ -102,7 +107,7 @@ def is_signed():
     if not 'signed_user' in session:
         return json.dumps({ 'answer': False })
 
-    print('govono')
+    #print('govono')
     User().set_online(session['signed_user'])
     return json.dumps({
         'answer': True,
@@ -154,7 +159,8 @@ def input_data_post():
                                 form.lastname.data,
                                 form.email.data,
                                 form.gender.data,
-                                form.orientation.data)
+                                form.orientation.data,
+                                form.interests.data)
     # else:
     #     res = False
     User().set_online(session['signed_user'])
@@ -166,12 +172,13 @@ def input_data_post():
 def get_recomended_users():
     if not 'signed_user' in session:
         return json.dumps({ 'answer': False })
-
+    if session['registration_ended'] == 0:
+        return json.dumps({ 'answer': False })
     filtres = json.loads(request.args.get('filtres'))
     page = json.loads(request.args.get('page'))
     res = User().get_all_users(session['signed_user'])
 
-    perPage = 2
+    perPage = 4
 
     if filtres['show'] == 'likers':
         res = list(filter(Filtres().likers_filter, res))
@@ -182,8 +189,8 @@ def get_recomended_users():
     elif filtres['show'] == 'custom':
         res = Filtres().orientation_filter(res, filtres['orientation'])
         res = Filtres().gender_filter(res, filtres['gender'])
-    pages = ceil(len(res) / 2)
-    res = res[2 * (page - 1) : 2 * (page - 1) + 2]
+    pages = ceil(len(res) / perPage)
+    res = res[perPage * (page - 1) : perPage * (page - 1) + perPage]
     User().set_online(session['signed_user'])
     return json.dumps({ 'answer': True , 'users': res, 'pages': pages})
 
@@ -209,9 +216,9 @@ def upload_image():
                             coordinates['top'] + coordinates['height'])
     cropped = img.crop( coordinates_to_crop )
     cropped.save(filepath)
-    User().upload_image(filename, session['signed_user'])
+    res = User().upload_image(filename, session['signed_user'])
     User().set_online(session['signed_user'])
-    return json.dumps({ 'answer': True })
+    return json.dumps({ 'answer': res })
     
 @app.route('/api/download_image', methods=['GET'])
 def download_image():
@@ -437,4 +444,49 @@ def password_recovery():
     res = User().change_pass(username, old, new)
 
     return json.dumps({ 'answer': res })
+    
+@app.route('/api/delete_image', methods=['GET'])
+def delete_image():
+    if not 'signed_user' in session:
+        return json.dumps({ 'answer': False })
+    user = session['signed_user']
+    id = request.args.get('id')
+
+    res = User().delete_image(user, id)
+    return json.dumps({ 'answer': res, })
+
+@app.route('/api/set_avatar', methods=['GET'])
+def set_avatar():
+    if not 'signed_user' in session:
+        return json.dumps({ 'answer': False })
+    user = session['signed_user']
+    id = request.args.get('id')
+
+    res = User().set_avatar(user, id)
+    return json.dumps({ 'answer': res, })
+
+@app.route('/api/change_bio', methods=['POST'])
+def change_bio():
+    if not 'signed_user' in session:
+        return json.dumps({ 'answer': False })
+
+    form = BioForm()
+
+    text = form.text.data
+    
+    res = User().change_bio(session['signed_user'], text)
+
+    return json.dumps({ 'answer': res })
+
+@app.route('/api/end_registration', methods=['GET'])
+def end_registration():
+    if not 'signed_user' in session:
+        return json.dumps({ 'answer': False })
+    user = session['signed_user']
+
+    res = User().end_registration(user)
+    print(res)
+    if (res):
+        session['registration_ended'] = True
+    return json.dumps({ 'answer': res, })
     

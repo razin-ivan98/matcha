@@ -23,7 +23,9 @@ import password_recovery from "./components/password_recovery.vue";
 import password_recovery_order from "./components/password_recovery_order.vue";
 
 import axios from "axios";
+import VueRx from "vue-rx";
 
+Vue.use(VueRx);
 Vue.use(BootstrapVue);
 Vue.use(VueRosource);
 Vue.use(VueRouter);
@@ -53,21 +55,33 @@ var router = new VueRouter({
       name: "user",
       path: "/user",
       component: user,
-      meta: { requiresAuth: true, requiresConfirm: true }
+      meta: {
+        requiresAuth: true,
+        requiresConfirm: true,
+        requiresRegistrationEnded: true
+      }
     },
 
     {
       name: "settings",
       path: "/settings",
       component: settings,
-      meta: { requiresAuth: true, requiresConfirm: true }
+      meta: {
+        requiresAuth: true,
+        requiresConfirm: true,
+        requiresRegistrationEnded: true
+      }
     },
 
     {
       name: "my_profile",
       path: "/my_profile",
       component: my_profile,
-      meta: { requiresAuth: true, requiresConfirm: true }
+      meta: {
+        requiresAuth: true,
+        requiresConfirm: true,
+        requiresRegistrationEnded: true
+      }
     },
 
     {
@@ -81,28 +95,44 @@ var router = new VueRouter({
       name: "profile",
       path: "/profile/:username",
       component: profile,
-      meta: { requiresAuth: true, requiresConfirm: true }
+      meta: {
+        requiresAuth: true,
+        requiresConfirm: true,
+        requiresRegistrationEnded: true
+      }
     },
 
     {
       name: "likes",
       path: "/likes",
       component: likes,
-      meta: { requiresAuth: true, requiresConfirm: true }
+      meta: {
+        requiresAuth: true,
+        requiresConfirm: true,
+        requiresRegistrationEnded: true
+      }
     },
 
     {
       name: "chats",
       path: "/chats",
       component: chats,
-      meta: { requiresAuth: true, requiresConfirm: true }
+      meta: {
+        requiresAuth: true,
+        requiresConfirm: true,
+        requiresRegistrationEnded: true
+      }
     },
 
     {
       name: "chat",
       path: "/chat/:username",
       component: chat,
-      meta: { requiresAuth: true, requiresConfirm: true }
+      meta: {
+        requiresAuth: true,
+        requiresConfirm: true,
+        requiresRegistrationEnded: true
+      }
     },
     {
       name: "password_recovery",
@@ -147,6 +177,15 @@ router.beforeEach(async function(to, from, next) {
   if (to.matched.some(record => record.meta.requiresConfirm)) {
     if (store.getters.confirmed === false) {
       next({
+        name: "input_data" //////////////////////не сюда
+      });
+      return;
+    }
+  }
+
+  if (to.matched.some(record => record.meta.requiresRegistrationEnded)) {
+    if (store.getters.registration_ended === false) {
+      next({
         name: "input_data"
       });
       return;
@@ -159,6 +198,7 @@ const store = new Vuex.Store({
   state: {
     username: null,
     confirmed: null,
+    registration_ended: null,
     user_info: null,
     likes: null,
     dialogs: null,
@@ -170,6 +210,9 @@ const store = new Vuex.Store({
     },
     change_confirmed(state, new_confirmed) {
       state.confirmed = new_confirmed;
+    },
+    change_registration_ended(state, new_registration_ended) {
+      state.registration_ended = new_registration_ended;
     },
     change_status(state, new_status) {
       state.status = new_status;
@@ -202,6 +245,9 @@ const store = new Vuex.Store({
     },
     dialogs: state => {
       return state.dialogs;
+    },
+    registration_ended: state => {
+      return state.registration_ended;
     }
   },
   actions: {
@@ -212,8 +258,17 @@ const store = new Vuex.Store({
             if (response.data.answer === true) {
               commit("change_username", response.data.username);
               commit("change_confirmed", response.data.confirmed);
-              commit("change_user_info", response.data.user_info);
+              const info = {
+                ...response.data.user_info,
+                interests: JSON.parse(response.data.user_info.interests)
+              };
+              commit("change_user_info", info);
               console.log("done");
+              const registration_ended =
+                response.data.user_info.register_data === 1 &&
+                response.data.user_info.register_image === 1 &&
+                response.data.user_info.register_geo === 1;
+              commit("change_registration_ended", registration_ended);
               resolve(true);
             } else {
               commit("change_username", false);
