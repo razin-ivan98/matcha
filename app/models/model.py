@@ -6,8 +6,8 @@ from flask import Flask
 class Model():
     def __init__(self):
         self.db = mysql.connector.connect(
-        #    host='172.17.0.2',
-           host='localhost',
+           host='192.168.99.100',
+            # host='localhost',
             user='root',
             passwd='root',
             # passwd='my-secret-pw',
