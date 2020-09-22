@@ -12,6 +12,10 @@ cd Frontend
 npm install
 npm audit fix
 
+npm run build
+
+cp dist/build.js ../app/static/dist/build.js
+
 cd ..
 python3 -m venv flask
 source flask/bin/activate
