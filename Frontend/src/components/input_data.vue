@@ -182,6 +182,7 @@
                 'zoomControl'
               ]"
               @click="onClick"
+              @map-was-initialized="onMapMounted"
             >
               <ymap-marker
                 v-if="this.mark"
@@ -292,19 +293,12 @@ export default {
       },
       interests: this.$store.getters.user_info.interests,
       dataSet: {
-        genders: [
-          { text: "Select One", value: null },
-          "Male",
-          "Female",
-          "Transgender",
-          "Teapot"
-        ],
+        genders: [{ text: "Select One", value: null }, "Male", "Female"],
         orientations: [
           { text: "Select One", value: null },
           "Natural",
           "Bisexual",
-          "Gomosexual",
-          "Pidor"
+          "Gomosexual"
         ]
       },
       bioForm: {
@@ -325,6 +319,10 @@ export default {
   },
   components: { clipperBasic, yandexMap, ymapMarker },
 
+  mounted() {
+    this.$store.commit("change_route_forbidden", true);
+  },
+
   computed: {
     images() {
       return this.$store.getters.user_info.images;
@@ -344,7 +342,8 @@ export default {
       axios.post("/api/input_data", frm).then(
         function(response) {
           if (response.data.answer) self.showAlert("success", "Success");
-          else self.showAlert("danger", "Error");
+          else
+            self.showAlert("danger", "Error: " + response.data.details || "");
         },
         function(error) {
           self.showAlert("danger", "Error");
@@ -356,7 +355,8 @@ export default {
       axios.post("/api/change_bio", this.bioForm).then(
         function(response) {
           if (response.data.answer) self.showAlert("success", "Success");
-          else self.showAlert("danger", "Error");
+          else
+            self.showAlert("danger", "Error: " + response.data.details || "");
         },
         function(error) {
           self.showAlert("danger", "Error");
@@ -368,7 +368,8 @@ export default {
       axios.post("/api/change_pass", this.passForm).then(
         function(response) {
           if (response.data.answer) self.showAlert("success", "Success");
-          else self.showAlert("danger", "Error");
+          else
+            self.showAlert("danger", "Error: " + response.data.details || "");
         },
         function(error) {
           self.showAlert("danger", "Error");
@@ -403,7 +404,8 @@ export default {
         function(response) {
           self.$store.dispatch("isSigned");
           if (response.data.answer) self.showAlert("success", "Success");
-          else self.showAlert("danger", "Error");
+          else
+            self.showAlert("danger", "Error: " + response.data.details || "");
         },
         function(error) {
           self.showAlert("danger", "Error");
@@ -414,7 +416,8 @@ export default {
       axios.get("/api/set_avatar?id=" + id).then(
         function(response) {
           if (response.data.answer) self.showAlert("success", "Success");
-          else self.showAlert("danger", "Error");
+          else
+            self.showAlert("danger", "Error: " + response.data.details || "");
         },
         function(error) {
           self.showAlert("danger", "Error");
@@ -447,7 +450,8 @@ export default {
         .then(
           function(response) {
             if (response.data.answer) self.showAlert("success", "Success");
-            else self.showAlert("danger", "Error");
+            else
+              self.showAlert("danger", "Error: " + response.data.details || "");
             self.onImageReset();
             self.$store.dispatch("isSigned");
           },
@@ -455,6 +459,9 @@ export default {
             self.showAlert("danger", "Error");
           }
         );
+    },
+    onMapMounted() {
+      this.$store.commit("change_route_forbidden", false);
     },
     onMapSubmit() {
       const self = this;
@@ -470,7 +477,8 @@ export default {
         .then(
           function(response) {
             if (response.data.answer) self.showAlert("success", "Success");
-            else self.showAlert("danger", "Error");
+            else
+              self.showAlert("danger", "Error: " + response.data.details || "");
           },
           function(error) {
             self.showAlert("danger", "Error");
@@ -490,7 +498,8 @@ export default {
               self.showAlert("success", "Success");
               self.$store.dispatch("isSigned");
               self.mark = self.store_coords;
-            } else self.showAlert("danger", "Error");
+            } else
+              self.showAlert("danger", "Error: " + response.data.details || "");
           },
           function(error) {
             self.showAlert("danger", "Error");
@@ -513,7 +522,8 @@ export default {
           if (response.data.answer) {
             self.showAlert("success", "Success");
             self.$router.push("/");
-          } else self.showAlert("danger", "Error");
+          } else
+            self.showAlert("danger", "Error: " + response.data.details || "");
         },
         function(error) {
           self.showAlert("danger", "Error");

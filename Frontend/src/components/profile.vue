@@ -29,12 +29,48 @@
                 ></b-carousel-slide>
               </b-carousel>
             </div>
-            <!-- <b-img
-              class="w-100"
-              :src=" '/api/download_image?avatar=' + user_info.avatar"
-              rounded
-              alt="Rounded image"
-            ></b-img>-->
+            <template
+              v-slot:footer
+              v-if="user_info.liked_me == true && user_info.liked == true"
+            >
+              <em class="text-success">This user is Your friend</em>
+            </template>
+            <template
+              v-slot:footer
+              v-else-if="user_info.liked_me == true && user_info.liked == false"
+            >
+              <em class="text-success">This user liked You</em>
+            </template>
+          </b-card>
+          <b-card class="mt-4">
+            <b-button
+              @click="
+                like(user_info.name);
+                user_info.liked = true;
+              "
+              v-if="user_info.liked == false"
+              variant="success"
+              >Like</b-button
+            >
+            <b-button
+              @click="
+                unlike(user_info.name);
+                user_info.liked = false;
+              "
+              v-else
+              variant="danger"
+              >Unlike</b-button
+            >
+            <b-button
+              @click="$router.push('/chat/' + user_info.name)"
+              variant="success"
+              v-if="user_info.liked == true && user_info.liked_me == true"
+              >Chat</b-button
+            >
+
+            <b-button @click="report(user_info.name)" variant="warning"
+              >Report</b-button
+            >
           </b-card>
         </b-col>
         <b-col>
@@ -78,12 +114,17 @@ export default {
       user_info: null
     };
   },
-
-  // computed: {
-  //   username() {
-  //     return this.$route.params.username;
-  //   }
-  // },
+  methods: {
+    like(username) {
+      axios.get("/api/like?username=" + username).then();
+    },
+    unlike(username) {
+      axios.get("/api/unlike?username=" + username).then();
+    },
+    report(username) {
+      axios.get("/api/report?username=" + username).then();
+    }
+  },
   watch: {
     $route(to, from) {
       this.username = this.$route.params.username;
@@ -92,26 +133,18 @@ export default {
 
   mounted() {
     var self = this;
-    console.log(this.username);
+    axios.get("/api/visit?username=" + this.username).then();
     axios.get("/api/get_user_info?username=" + this.username).then(
       function(response) {
-        console.log(response.data);
         if (response.data.answer === true) {
-          //commit("change_username", response.data.username);
-          //commit("change_confirmed", response.data.confirmed);
-          //commit("change_user_info", response.data.user_info);
-          // console.log("done");
           self.user_info = response.data.user_info;
           self.user_info.interests = JSON.parse(self.user_info.interests);
           self.waiting = false;
         } else {
-          //// commit("change_username", false);
-          // console.log("done");
+          self.$router.push("/404");
         }
       },
-      function(error) {
-        console.log(error);
-      }
+      function(error) {}
     );
   }
 };

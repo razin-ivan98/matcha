@@ -1,7 +1,5 @@
 clear
 
-# git clone https://github.com/razin-ivan98/matcha.git
-
 docker-machine stop
 docker-machine rm default
 

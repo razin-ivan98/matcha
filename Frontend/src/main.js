@@ -21,6 +21,9 @@ import chats from "./components/chats.vue";
 import chat from "./components/chat.vue";
 import password_recovery from "./components/password_recovery.vue";
 import password_recovery_order from "./components/password_recovery_order.vue";
+import blacklist from "./components/blacklist.vue";
+import guests from "./components/guests.vue";
+import not_found from "./components/not_found.vue";
 
 import axios from "axios";
 import VueRx from "vue-rx";
@@ -145,16 +148,53 @@ var router = new VueRouter({
       path: "/password_recovery_order",
       component: password_recovery_order,
       meta: { guest: true }
+    },
+    {
+      name: "blacklist",
+      path: "/blacklist",
+      component: blacklist,
+      meta: {
+        requiresAuth: true,
+        requiresConfirm: true,
+        requiresRegistrationEnded: true
+      }
+    },
+    {
+      name: "guests",
+      path: "/guests",
+      component: guests,
+      meta: {
+        requiresAuth: true,
+        requiresConfirm: true,
+        requiresRegistrationEnded: true
+      }
+    },
+    {
+      name: "404",
+      path: "/404",
+      component: not_found,
+      meta: {
+        requiresAuth: true,
+        requiresConfirm: true,
+        requiresRegistrationEnded: true
+      }
+    },
+    {
+      path: "*",
+      redirect: "/404"
     }
   ]
 });
 
 router.beforeEach(async function(to, from, next) {
+  if (store.getters.route_forbidden) {
+    next(false);
+    return;
+  }
+
   store.commit("change_status", "request");
   await store.dispatch("isSigned");
   store.commit("change_status", "ready");
-
-  console.log("Username: " + store.getters.username);
 
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (store.getters.username === false) {
@@ -177,7 +217,7 @@ router.beforeEach(async function(to, from, next) {
   if (to.matched.some(record => record.meta.requiresConfirm)) {
     if (store.getters.confirmed === false) {
       next({
-        name: "input_data" //////////////////////не сюда
+        name: "input_data"
       });
       return;
     }
@@ -191,7 +231,7 @@ router.beforeEach(async function(to, from, next) {
       return;
     }
   }
-  next(); // всегда так или иначе нужно вызвать next()!
+  next();
 });
 
 const store = new Vuex.Store({
@@ -202,7 +242,9 @@ const store = new Vuex.Store({
     user_info: null,
     likes: null,
     dialogs: null,
-    status: "ready"
+    guests: null,
+    status: "ready",
+    route_forbidden: false
   },
   mutations: {
     change_username(state, new_username) {
@@ -223,8 +265,14 @@ const store = new Vuex.Store({
     change_likes(state, new_likes) {
       state.likes = new_likes;
     },
+    change_guests(state, new_guests) {
+      state.guests = new_guests;
+    },
     change_dialogs(state, new_dialogs) {
       state.dialogs = new_dialogs;
+    },
+    change_route_forbidden(state, new_route_forbidden) {
+      state.route_forbidden = new_route_forbidden;
     }
   },
   getters: {
@@ -243,11 +291,17 @@ const store = new Vuex.Store({
     likes: state => {
       return state.likes;
     },
+    guests: state => {
+      return state.guests;
+    },
     dialogs: state => {
       return state.dialogs;
     },
     registration_ended: state => {
       return state.registration_ended;
+    },
+    route_forbidden: state => {
+      return state.route_forbidden;
     }
   },
   actions: {
@@ -263,7 +317,6 @@ const store = new Vuex.Store({
                 interests: JSON.parse(response.data.user_info.interests)
               };
               commit("change_user_info", info);
-              console.log("done");
               const registration_ended =
                 response.data.user_info.register_data === 1 &&
                 response.data.user_info.register_image === 1 &&
@@ -272,13 +325,10 @@ const store = new Vuex.Store({
               resolve(true);
             } else {
               commit("change_username", false);
-              console.log("done");
               resolve(false);
             }
           },
-          function(error) {
-            console.log(error);
-          }
+          function(error) {}
         );
       });
     }

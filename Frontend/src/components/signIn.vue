@@ -43,7 +43,7 @@
         :variant="variant"
         @dismiss-count-down="countDownChanged"
       >
-        Error
+        {{ alertText }}
       </b-alert>
     </b-card>
   </div>
@@ -58,6 +58,7 @@ export default {
   data() {
     return {
       form: {},
+      alertText: "",
       variant: "danger",
       dismissSecs: 5,
       dismissCountDown: 0,
@@ -70,14 +71,12 @@ export default {
       var self = this;
       axios.post("/api/sign_in", this.form).then(
         function(response) {
-          //console.log(response);
-          //alert(response.data.answer);
           if (response.data.answer === true) {
             self.$emit("signed-in");
-          } else self.showAlert("danger");
+          } else
+            self.showAlert("danger", "Error: " + response.data.details || "");
         },
         function(error) {
-          console.log(error);
           self.showAlert("danger", "Error");
         }
       );
@@ -86,7 +85,8 @@ export default {
     countDownChanged(dismissCountDown) {
       this.dismissCountDown = dismissCountDown;
     },
-    showAlert(variant) {
+    showAlert(variant, text) {
+      this.alertText = text;
       this.variant = variant;
       this.dismissCountDown = this.dismissSecs;
     }

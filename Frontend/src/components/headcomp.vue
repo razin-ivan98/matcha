@@ -9,8 +9,8 @@
     >
       <router-link to="/" tag="b-navbar-brand">Matcha</router-link>
       <b-navbar-toggle target="nav-collapse">
-        <b-badge v-if="likes + dialogs > 0" variant="warning">{{
-          likes + dialogs
+        <b-badge v-if="likes + dialogs + guests > 0" variant="warning">{{
+          likes + dialogs + guests
         }}</b-badge>
       </b-navbar-toggle>
       <b-collapse id="nav-collapse" is-nav>
@@ -19,10 +19,16 @@
 
           <router-link to="/user" tag="b-nav-item">Feed</router-link>
           <router-link to="/my_profile" tag="b-nav-item">Profile</router-link>
+          <router-link to="/blacklist" tag="b-nav-item">Blacklist</router-link>
 
           <router-link to="/likes" tag="b-nav-item">
             Likes
             <b-badge v-if="likes > 0" variant="warning">{{ likes }}</b-badge>
+          </router-link>
+
+          <router-link to="/guests" tag="b-nav-item">
+            Guests
+            <b-badge v-if="guests > 0" variant="warning">{{ guests }}</b-badge>
           </router-link>
 
           <router-link to="/chats" tag="b-nav-item">
@@ -32,10 +38,8 @@
             }}</b-badge>
           </router-link>
         </b-navbar-nav>
-        <!-- Right aligned nav items -->
         <b-navbar-nav class="ml-auto">
           <b-nav-item-dropdown right>
-            <!-- Using 'button-content' slot -->
             <template v-slot:button-content>
               <em>{{ username }}</em>
             </template>
@@ -62,16 +66,6 @@ export default {
     signOut() {
       this.$emit("signed-out");
     }
-
-    // getUserName(){
-    //   var self = this;
-    //   axios.get('/api/get_username').then(function (response) {
-    //       self.username = response.data.username;
-    //       console.log(response.data.username);
-    //     }, function (error) {
-    //       console.log(error)
-    //     })
-    // }
   },
   computed: {
     username() {
@@ -83,14 +77,13 @@ export default {
     dialogs() {
       return this.$store.getters.dialogs;
     },
+    guests() {
+      return this.$store.getters.guests;
+    },
     registration_ended() {
       return this.$store.getters.registration_ended;
     }
   }
-
-  // created(){
-  //   this.getUserName();
-  // }
 };
 </script>
 

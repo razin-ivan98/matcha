@@ -13,6 +13,8 @@ import string
 from flask_mail import Message
 from app import mail
 
+from itertools import chain
+
 
 class User(Model):
     def is_confirmed(self, login):
@@ -24,9 +26,6 @@ class User(Model):
             return  True
         else:
             return  False
-        # if cursor.rowcount > 0:  
-        #     return ({'answer': True, 'username': res[0][0]})
-        # else:
         
 
     def get_all_users(self, login):
@@ -34,11 +33,22 @@ class User(Model):
         params = (login,)
         cursor.execute("SELECT * FROM users WHERE (name != %s)", params)
         res = cursor.fetchall()
-        for user in res:
+
+        cursor = self.db.cursor(dictionary=False)
+        params = (login, )
+        cursor.execute("SELECT blocked_user FROM blacklist WHERE (user = %s)", params)
+        blacklist = list(chain.from_iterable(cursor.fetchall()))
+
+        users = res
+
+        for user in users:
+            if user['name'] in blacklist:
+                user['name'] = False
             del user['password']
             del user['email']
             user['liked'] = self.is_liked(login, user['name'])
             user['liked_me'] = self.is_liked(user['name'], login)
+            
             user['online'] = user['online'].strftime("%d-%m-%Y %H:%M:%S")
 
             del user['image1']
@@ -46,7 +56,7 @@ class User(Model):
             del user['image3']
             del user['image4']
             del user['image5']
-        return (res)
+        return (list(filter(lambda x: x['name'] != False , users)))
 
     def upload_image(self, filename, login):
         cursor = self.db.cursor(dictionary=True)
@@ -58,10 +68,13 @@ class User(Model):
         while (i < 6):
             if res[0]['image' + str(i)] == None:
                 cursor.execute("UPDATE users SET image%s" % (str(i)) + "=%s WHERE name=%s", params)
+                params = (login,)
+                cursor.execute("UPDATE users SET rating = rating + 5 WHERE name=%s", params)
                 break
             i += 1
             if i == 6:
                 return False
+        params = (filename, login,)
         cursor.execute("UPDATE users SET register_image=1, avatar=%s WHERE name=%s", params)
         return True
 
@@ -73,11 +86,14 @@ class User(Model):
         res = cursor.fetchall()
         return (res[0][0])
 
-    def get_user_info(self, login):
+    def get_user_info(self, login, signed_user):
         cursor = self.db.cursor(dictionary=True)
         params = (login,)
         cursor.execute("SELECT * FROM users WHERE name=%s", params)
-        res = cursor.fetchall()[0]
+        res = cursor.fetchall()
+        if cursor.rowcount == 0:
+            return False
+        res = res[0]
         del res['password']
         res['online'] = res['online'].strftime("%d-%m-%Y %H:%M:%S")
         res['images'] = [item for item in[
@@ -93,32 +109,44 @@ class User(Model):
         del res['image3']
         del res['image4']
         del res['image5']
+
+        res['liked'] = self.is_liked(signed_user, login)
+        res['liked_me'] = self.is_liked(login, signed_user)
+
         return res
         
     def is_liked(self, liker, liked):
         cursor = self.db.cursor()
         params = (liker, liked,)
-        cursor.execute("SELECT * FROM likes WHERE liker=%s AND liked=%s", params)
+        cursor.execute("SELECT * FROM likes WHERE liker=%s AND liked=%s AND type='like'", params)
         res = cursor.fetchall()
         if len(res) > 0:
             return True
         return False
     
     def like(self, liker, liked):
-        cursor = self.db.cursor()#проверка, есть ли такой юзер
-
-        params = (liker, liked,)
-        cursor.execute("INSERT INTO likes (liker, liked, date, got) VALUES (%s, %s, NOW(), 0)", params)
-
-    def unlike(self, liker, liked):
-        cursor = self.db.cursor()#проверка, есть ли такой юзер
+        cursor = self.db.cursor()
         params = (liker, liked,)
         cursor.execute("DELETE FROM likes WHERE liker=%s AND liked=%s", params)
+        params = (liker, liked, "like")
+        cursor.execute("INSERT INTO likes (liker, liked, date, got, type) VALUES (%s, %s, NOW(), 0, %s)", params)
+        params = (liked,)
+        cursor.execute("UPDATE users SET rating = rating + 10 WHERE name=%s", params)
+
+
+    def unlike(self, liker, liked):
+        cursor = self.db.cursor()
+        params = (liker, liked)
+        cursor.execute("DELETE FROM likes WHERE liker=%s AND liked=%s", params)
+        params = (liker, liked, "unlike")
+        cursor.execute("INSERT INTO likes (liker, liked, date, got, type) VALUES (%s, %s, NOW(), 0, %s)", params)
+        params = (liked,)
+        cursor.execute("UPDATE users SET rating = rating - 10 WHERE name=%s", params)
 
     def get_likes(self, liked):
         cursor = self.db.cursor(dictionary=True)
         params = (liked,)
-        cursor.execute("SELECT l.id, l.liker, l.liked, l.got, DATE_FORMAT(l.date,'%d-%m-%Y') date, u.firstname, u.lastname FROM likes l  INNER JOIN users u ON u.name = l.liker WHERE l.liked=%s", params)
+        cursor.execute("SELECT l.id, l.liker, l.liked, l.got, l.type, DATE_FORMAT(l.date,'%d-%m-%Y') date, u.firstname, u.lastname FROM likes l  INNER JOIN users u ON u.name = l.liker WHERE l.liked=%s", params)
         res = cursor.fetchall()
         return res
 
@@ -126,6 +154,13 @@ class User(Model):
         cursor = self.db.cursor()
         params = (liked,)
         cursor.execute("SELECT COUNT(*) FROM likes WHERE liked=%s AND got=0", params)
+        res = cursor.fetchall()[0][0]
+        return res
+
+    def get_unread_guests(self, user):
+        cursor = self.db.cursor()
+        params = (user,)
+        cursor.execute("SELECT COUNT(*) FROM guests WHERE visited_user=%s AND got=0", params)
         res = cursor.fetchall()[0][0]
         return res
 
@@ -215,6 +250,8 @@ class User(Model):
         params = (user,)
         
         cursor.execute("UPDATE users SET image%s " % (id) + "=Null WHERE name = %s", params)
+        cursor.execute("UPDATE users SET rating = rating - 5 WHERE name=%s", params)
+
         return True
     
     def set_avatar(self, user, id):
@@ -242,7 +279,70 @@ class User(Model):
         cursor = self.db.cursor()
         params = (user,)
         cursor.execute("SELECT * FROM users WHERE register_data=1 AND register_image=1 AND register_geo=1 AND name=%s", params)
+        cursor.execute("UPDATE users SET rating = rating + 20 WHERE name=%s", params)
+
         cursor.fetchall()
         if (cursor.rowcount == 0):
             return False
         return True
+
+    def report(self, user, reported_user):
+        msg = Message('REPORT', sender='chorange.matcha.manager@gmail.com', recipients=['chorange.matcha.manager@gmail.com'])
+        msg.body = 'REPORT'
+        msg.html = '<h1>User %s reported %s</h1>' % (user, reported_user)
+        mail.send(msg)
+
+    def block_user(self, user, blocked_user):
+        cursor = self.db.cursor()
+        params = (user, blocked_user)
+        cursor.execute("SELECT * FROM blacklist WHERE user=%s AND blocked_user=%s", params)
+        res = cursor.fetchall()
+        if cursor.rowcount == 0:
+            cursor.execute("INSERT INTO blacklist (user, blocked_user) VALUES (%s, %s)", params)
+
+    def get_blacklist(self, user):
+        cursor = self.db.cursor(dictionary=True)
+        params = (user,)
+        cursor.execute("SELECT blocked_user AS name FROM blacklist WHERE user=%s", params)
+        res = cursor.fetchall()
+        for user in res:
+            name = user['name']
+            params = (name,)
+            cursor.execute("SELECT * FROM users WHERE name=%s", params)
+            data = cursor.fetchall()[0]
+            user['firstname'] = data['firstname']
+            user['lastname'] = data['lastname']
+        return res
+
+    def unblock(self, user, unblocked_user):
+        cursor = self.db.cursor()
+        params = (user, unblocked_user)
+        cursor.execute("DELETE FROM blacklist WHERE user=%s AND blocked_user=%s", params)
+
+    def visit(self, user, visited_user):
+        cursor = self.db.cursor()
+        params = (user, visited_user)
+        cursor.execute("INSERT INTO guests (user, visited_user) VALUES (%s, %s)", params)
+
+    def get_guests(self, user):
+        cursor = self.db.cursor(dictionary=True)
+        params = (user,)
+        cursor.execute("SELECT * FROM guests WHERE visited_user=%s", params)
+        res = cursor.fetchall()
+        for user in res:
+            name = user['user']
+            params = (name,)
+            del user['user']
+            user['name'] = name
+            cursor.execute("SELECT * FROM users WHERE name=%s", params)
+            data = cursor.fetchall()[0]
+            user['firstname'] = data['firstname']
+            user['lastname'] = data['lastname']
+        return res
+
+    def guest_read(self, id, signed_user):
+        cursor = self.db.cursor()
+        params = (id, signed_user,)
+        cursor.execute("DELETE FROM guests WHERE id=%s AND visited_user=%s", params)
+
+

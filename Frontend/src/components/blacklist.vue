@@ -13,27 +13,25 @@
       <b-container>
         <b-card>
           <b-card
-            v-for="(like, key) in likes"
+            v-for="(user, key) in blacklist"
             :key="key"
-            :img-src="'/api/get_avatar?username=' + like.liker"
-            :bg-variant="like.type === 'unlike' ? 'danger' : 'default'"
-            :text-variant="like.type === 'unlike' ? 'white' : 'black'"
+            :img-src="'/api/get_avatar?username=' + user.name"
             img-left
             img-width="80"
             img-height="80"
           >
-            {{ like.firstname + " " + like.lastname + like.type }}
+            {{ user.firstname + " " + user.lastname }}
             <b-button
-              @click="$router.push('/profile/' + like.liker)"
+              @click="$router.push('/profile/' + user.name)"
               variant="primary"
-              >Profile</b-button
             >
+              Profile
+            </b-button>
             <b-button
-              v-if="like.got === 0"
-              @click="likeRead(like.id)"
+              @click="unblock(user.name)"
               style="position: inline block"
               variant="success"
-              >Got it</b-button
+              >Unblock</b-button
             >
           </b-card>
         </b-card>
@@ -46,44 +44,35 @@
 import axios from "axios";
 
 export default {
-  name: "likes",
+  name: "blaclist",
 
   data() {
     return {
-      interval: null,
       waiting: true,
-      likes: []
+      blacklist: []
     };
   },
 
   methods: {
-    likeRead(like_id) {
+    unblock(username) {
       var self = this;
-      axios.get("/api/like_read?like_id=" + like_id).then(function() {
-        self.$emit("update");
-        self.getLikes();
+      axios.get("/api/unblock?username=" + username).then(function() {
+        self.getBlacklist();
       });
     },
-    getLikes() {
+    getBlacklist() {
       var self = this;
-      axios.get("/api/get_likes").then(function(response) {
+      self.waiting = true;
+      axios.get("/api/get_blacklist").then(function(response) {
         if (response.data.answer === true) {
-          self.likes = response.data.likes;
+          self.blacklist = response.data.blacklist;
         }
         self.waiting = false;
       });
     }
   },
-  computed: {},
   mounted() {
-    const self = this;
-    this.getLikes();
-    this.interval = setInterval(() => {
-      self.getLikes();
-    }, 5000);
-  },
-  beforeDestroy() {
-    clearInterval(this.interval);
+    this.getBlacklist();
   }
 };
 </script>

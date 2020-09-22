@@ -37,13 +37,16 @@ export default {
 
   methods: {
     onSigning() {
-      this.$router.push("user").catch(e => {
-        console.log("ERROR: " + e);
-      });
+      this.$router.push("user").catch(e => {});
     },
 
     onSigningOut() {
       this.$store.commit("change_username", false);
+      this.$store.commit("change_likes", 0);
+      this.$store.commit("change_dialogs", 0);
+      this.$store.commit("change_guests", 0);
+      this.$store.commit("change_user_info", false);
+
       var self = this;
       axios.get("/api/sign_out").then(function() {
         self.$router.push("sign_in");
@@ -53,6 +56,7 @@ export default {
     updateAll() {
       var self = this;
       if (!self.$store.getters.username) return;
+      if (!self.$store.getters.registration_ended) return;
       axios.get("/api/get_unread_likes_count").then(function(response) {
         if (response.data.answer === true)
           self.$store.commit("change_likes", response.data.likes_count);
@@ -62,30 +66,12 @@ export default {
         if (response.data.answer === true)
           self.$store.commit("change_dialogs", response.data.dialogs_count);
       });
+
+      axios.get("/api/get_unread_guests_count").then(function(response) {
+        if (response.data.answer === true)
+          self.$store.commit("change_guests", response.data.guests_count);
+      });
     }
-
-    // isSigned() {
-    //   var self = this;
-    //   return new Promise((resolve, reject) => {
-    //     axios.get('/api/get_username').then(function (response) {
-    //       if (response.data.answer === true) {
-    //         self.$store.commit('change_username', response.data.username);
-    //         self.$store.commit('change_confirmed', response.data.confirmed);
-    //         console.log('done');
-    //         resolve(true);
-    //       }
-    //       else {
-    //         self.$store.commit('change_username', false);
-    //         console.log('done');
-    //         resolve(false);
-    //       }
-
-    //     }, function (error) {
-    //       console.log(error)
-    //     })
-    //   })
-
-    // },
   },
 
   computed: {

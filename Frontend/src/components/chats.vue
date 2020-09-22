@@ -86,8 +86,6 @@ export default {
     self.getMyChats();
     moment.locale("ru");
     self.interId = setInterval(self.getMyChats, 4000);
-
-    console.log(this.chats, "chats");
   },
   beforeDestroy() {
     clearInterval(this.interId);

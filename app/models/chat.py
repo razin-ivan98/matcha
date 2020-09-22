@@ -12,7 +12,7 @@ class Chat(Model):
         for elem in res:
             ret_elem = {}
             friend_name = elem['friend_2'] if elem['friend_1'] == username else elem['friend_1'] 
-            friend = User().get_user_info(friend_name)
+            friend = User().get_user_info(friend_name, friend_name)
             ret_elem['friend'] = friend
             ret_elem['unread'] = 0 if elem['last_activist'] == username else elem['unread']
             ret_elem['last_activity'] = elem['last_activity'].strftime("%d-%m-%Y %H:%M:%S")
@@ -30,6 +30,11 @@ class Chat(Model):
         params = (username, friend, username,)
         if len(is_liked) > 0 and len(is_dialog) == 0:
             cursor.execute("INSERT INTO dialogs (friend_1, friend_2, last_activity, last_activist, unread) VALUES (%s, %s, NOW(), %s,0)", params)
+        params = (username,)
+        cursor.execute("UPDATE users SET rating = rating + 10 WHERE name=%s", params)
+        params = (friend,)
+        cursor.execute("UPDATE users SET rating = rating + 10 WHERE name=%s", params)
+        
 
     def delete_dialog(self, username, unfriended):
         cursor = self.db.cursor()
@@ -95,6 +100,6 @@ class Chat(Model):
         res = cursor.fetchall()
         if (len(res) == 0):
             return False
-        return User().get_user_info(user)
+        return User().get_user_info(user, signedUser)
 
 

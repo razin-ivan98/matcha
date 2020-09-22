@@ -1,2 +1,2 @@
-CSRF_ENABLED = True
+CSRF_ENABLED = False
 SECRET_KEY = 'you-will-never-guess'

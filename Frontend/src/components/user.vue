@@ -17,14 +17,17 @@
             v-for="(user, key) in users"
             :key="key"
             :title="user.firstname + ' ' + user.lastname"
-            :img-src="'/api/download_image?avatar=' + user.avatar"
-            img-alt="Image"
-            img-top
             tag="article"
             class="mt-3 border-success"
             style="min-width: 17rem; max-width: 30rem; display: inline-block"
             footer-tag="footer"
           >
+            <b-card-img
+              :src="'/api/download_image?avatar=' + user.avatar"
+              :top="true"
+              alt="avatar"
+              @click="toProfile(user.name)"
+            ></b-card-img>
             <b-card-text>{{
               "Был в сети " + get_online(user.online)
             }}</b-card-text>
@@ -35,11 +38,6 @@
 
             <b-card-text>{{ user.location }}</b-card-text>
 
-            <b-button
-              @click="$router.push('/profile/' + user.name)"
-              variant="primary"
-              >Profile</b-button
-            >
             <b-button
               @click="
                 like(user.name);
@@ -59,11 +57,16 @@
               >Unlike</b-button
             >
             <b-button
-              @click="$router.push('/chat/' + user.name)"
+              @click="toChat(user.name)"
               variant="success"
               v-if="user.liked == true && user.liked_me == true"
               >Chat</b-button
             >
+
+            <b-button @click="report(user.name)" variant="warning"
+              >Report</b-button
+            >
+            <b-button @click="hide(user.name)" variant="warning">Hide</b-button>
 
             <template
               v-slot:footer
@@ -94,63 +97,167 @@
     <b-navbar variant="success" fixed="bottom">
       <b-card no-body class="mb-1 w-75 mx-auto">
         <b-card-header header-tag="header" class="p-0" role="tab">
-          <b-button v-b-toggle.accordion-1 variant="success" class="w-100"
-            >Filtres</b-button
-          >
+          <b-button v-b-toggle.accordion-1 variant="success" class="w-100">
+            Feed settings
+          </b-button>
         </b-card-header>
         <b-collapse id="accordion-1" class="mt-2">
           <b-card-body>
-            <b-form-group>
-              <b-form-radio v-model="filtres.show" value="all"
-                >All users</b-form-radio
-              >
-              <b-form-radio v-model="filtres.show" value="recommended"
-                >Recommended</b-form-radio
-              >
-              <b-form-radio v-model="filtres.show" value="friends"
-                >Friends</b-form-radio
-              >
-              <b-form-radio v-model="filtres.show" value="likers"
-                >Likers</b-form-radio
-              >
-              <b-form-radio v-model="filtres.show" value="liked"
-                >Liked</b-form-radio
-              >
-              <b-form-radio v-model="filtres.show" value="custom"
-                >Custom filtres</b-form-radio
-              >
-              <b-form-group v-if="filtres.show == 'custom'">
-                <b-form-group label="Gender">
-                  <b-form-checkbox-group
-                    id="checkbox-group-2"
-                    v-model="filtres.gender"
-                    name="flavour-2"
-                  >
-                    <b-form-checkbox value="Male">Male</b-form-checkbox>
-                    <b-form-checkbox value="Female">Female</b-form-checkbox>
-                    <b-form-checkbox value="Teapot">Teapot</b-form-checkbox>
-                    <b-form-checkbox value="Transgender"
-                      >Transgender</b-form-checkbox
+            <b-tabs content-class="mt-3">
+              <b-tab title="Mode" active>
+                <p>
+                  <b-form-group>
+                    <b-form-radio v-model="filtres.show" value="recommended"
+                      >Recommended</b-form-radio
                     >
-                  </b-form-checkbox-group>
-                </b-form-group>
 
-                <b-form-group label="Orientation">
-                  <b-form-checkbox-group
-                    id="checkbox-group-3"
-                    v-model="filtres.orientation"
-                    name="flavour-2"
-                  >
-                    <b-form-checkbox value="Natural">Natural</b-form-checkbox>
-                    <b-form-checkbox value="Gomosexual"
-                      >Gomosexual</b-form-checkbox
+                    <b-form-radio v-model="filtres.show" value="custom"
+                      >Advanced search</b-form-radio
                     >
-                    <b-form-checkbox value="Bisexual">Bisexual</b-form-checkbox>
-                    <b-form-checkbox value="Pidor">Pidor</b-form-checkbox>
-                  </b-form-checkbox-group>
-                </b-form-group>
-              </b-form-group>
-            </b-form-group>
+                    <b-form-group v-if="filtres.show == 'custom'">
+                      <b-form-group label="Gender">
+                        <b-form-checkbox-group
+                          id="checkbox-group-2"
+                          v-model="filtres.gender"
+                          name="flavour-2"
+                        >
+                          <b-form-checkbox value="Male">Male</b-form-checkbox>
+                          <b-form-checkbox value="Female"
+                            >Female</b-form-checkbox
+                          >
+                        </b-form-checkbox-group>
+                      </b-form-group>
+
+                      <b-form-group label="Orientation">
+                        <b-form-checkbox-group
+                          id="checkbox-group-3"
+                          v-model="filtres.orientation"
+                          name="flavour-2"
+                        >
+                          <b-form-checkbox value="Natural"
+                            >Natural</b-form-checkbox
+                          >
+                          <b-form-checkbox value="Gomosexual"
+                            >Gomosexual</b-form-checkbox
+                          >
+                          <b-form-checkbox value="Bisexual"
+                            >Bisexual</b-form-checkbox
+                          >
+                        </b-form-checkbox-group>
+                      </b-form-group>
+
+                      <b-form-group label="Age">
+                        From
+                        <b-form-spinbutton
+                          v-model="filtres.age[0]"
+                          min="0"
+                          max="130"
+                          inline
+                          size="sm"
+                        ></b-form-spinbutton>
+                        To
+                        <b-form-spinbutton
+                          v-model="filtres.age[1]"
+                          min="0"
+                          max="130"
+                          inline
+                          size="sm"
+                        ></b-form-spinbutton>
+                      </b-form-group>
+                      <b-form-group label="Rating">
+                        From
+                        <b-form-spinbutton
+                          v-model="filtres.rating[0]"
+                          min="0"
+                          max="5000"
+                          inline
+                          size="sm"
+                        ></b-form-spinbutton>
+                        To
+                        <b-form-spinbutton
+                          v-model="filtres.rating[1]"
+                          min="0"
+                          max="5000"
+                          inline
+                          size="sm"
+                        ></b-form-spinbutton>
+                      </b-form-group>
+                      <b-form-group label="Geo Distance (km)">
+                        From
+                        <b-form-spinbutton
+                          v-model="filtres.geo[0]"
+                          min="0"
+                          max="20000"
+                          inline
+                          size="sm"
+                        ></b-form-spinbutton>
+                        To
+                        <b-form-spinbutton
+                          v-model="filtres.geo[1]"
+                          min="0"
+                          max="20000"
+                          inline
+                          size="sm"
+                        ></b-form-spinbutton>
+                      </b-form-group>
+                      <b-form-group label="Common tags">
+                        From
+                        <b-form-spinbutton
+                          v-model="filtres.common_tags[0]"
+                          min="0"
+                          max="20"
+                          inline
+                          size="sm"
+                        ></b-form-spinbutton>
+                        To
+                        <b-form-spinbutton
+                          v-model="filtres.common_tags[1]"
+                          min="0"
+                          max="20"
+                          inline
+                          size="sm"
+                        ></b-form-spinbutton>
+                      </b-form-group>
+                    </b-form-group>
+                  </b-form-group>
+                </p>
+              </b-tab>
+              <b-tab title="Filtres">
+                <p>
+                  <b-form-radio v-model="filtres.filtres" value="all"
+                    >All</b-form-radio
+                  >
+                  <b-form-radio v-model="filtres.filtres" value="friends"
+                    >Friends</b-form-radio
+                  >
+                  <b-form-radio v-model="filtres.filtres" value="likers"
+                    >Likers</b-form-radio
+                  >
+                  <b-form-radio v-model="filtres.filtres" value="liked"
+                    >Liked</b-form-radio
+                  >
+                </p>
+              </b-tab>
+              <b-tab title="Sort">
+                <p>
+                  <b-form-radio v-model="filtres.sort" value="none"
+                    >None</b-form-radio
+                  >
+                  <b-form-radio v-model="filtres.sort" value="age"
+                    >Age</b-form-radio
+                  >
+                  <b-form-radio v-model="filtres.sort" value="rating"
+                    >Rating</b-form-radio
+                  >
+                  <b-form-radio v-model="filtres.sort" value="geo"
+                    >Geo Distance</b-form-radio
+                  >
+                  <b-form-radio v-model="filtres.sort" value="common_tags"
+                    >Common tags</b-form-radio
+                  >
+                </p>
+              </b-tab>
+            </b-tabs>
           </b-card-body>
         </b-collapse>
       </b-card>
@@ -172,16 +279,30 @@ export default {
       currentPage: 1,
 
       filtres: {
-        show: "all",
-        gender: [],
-        orientation: []
+        show: "recommended",
+        filtres: "all",
+        sort: "none",
+        gender: ["Male", "Female"],
+        orientation: ["Natural", "Gomosexual", "Bisexual"],
+        rating: [0, 500],
+        age: [0, 130],
+        common_tags: [0, 20],
+        geo: [0, 100]
       },
-      users: ["ololo"],
+      users: [],
       waiting: true
     };
   },
 
   methods: {
+    toProfile(name) {
+      let routeData = this.$router.resolve({ path: "/profile/" + name });
+      window.open(routeData.href, "_blank");
+    },
+    toChat(name) {
+      let routeData = this.$router.resolve({ path: "/chat/" + name });
+      window.open(routeData.href, "_blank");
+    },
     paginationInput(e) {
       this.get_users();
     },
@@ -191,10 +312,16 @@ export default {
     unlike(username) {
       axios.get("/api/unlike?username=" + username).then();
     },
+    report(username) {
+      axios.get("/api/report?username=" + username).then();
+    },
+    hide(username) {
+      axios.get("/api/hide?username=" + username).then();
+      this.users = this.users.filter(elem => elem.name !== username);
+    },
     get_users() {
       this.waiting = true;
       var self = this;
-      // console.log(this.currentPage);
       axios
         .get(
           "/api/get_recomended_users?filtres=" +
@@ -206,10 +333,8 @@ export default {
           if (response.data.answer === true) {
             self.users = response.data.users;
             self.pagesCount = response.data.pages;
-            // console.log(self.users);
             self.waiting = false;
           } else {
-            ////////////////////////////////
           }
         });
     },

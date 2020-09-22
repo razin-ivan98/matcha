@@ -79,12 +79,11 @@ export default {
       let self = this;
       axios.post("/api/sign_up", this.form).then(
         function(response) {
-          console.log(response);
           if (response.data.answer) self.showAlert("success", "Success");
-          else self.showAlert("danger", "Error");
+          else
+            self.showAlert("danger", "Error: " + response.data.details || "");
         },
         function(error) {
-          console.log(error);
           self.showAlert("danger", "Error");
         }
       );

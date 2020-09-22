@@ -25,9 +25,6 @@
             <b-card-text style="float:right;">
               {{ "Был в сети " + get_online(friend.online) }}
             </b-card-text>
-            <!-- <span
-                style="float:right;"
-            >{{ mom(chat.last_activity, "DD-MM-YYYY hh:mm:ss") }}</span>-->
           </b-card>
 
           <b-card
@@ -114,17 +111,12 @@ export default {
         : moment(str, "DD-MM-YYYY hh:mm:ss").fromNow();
     },
     sendMessage() {
-      // console.log(this.form);
       let self = this;
       axios.post("/api/new_message", this.form).then(
         function(response) {
-          console.log(response);
           self.form.curr_message = "";
-          //  alert(response.data.answer);
         },
-        function(error) {
-          console.log(error);
-        }
+        function(error) {}
       );
     },
     getMessages() {
@@ -143,7 +135,6 @@ export default {
                   mw.scrollIntoView();
                 });
             } else {
-              ////////////////////////////////
             }
           });
       } else {
@@ -172,7 +163,6 @@ export default {
                     mw.scrollIntoView();
                 });
             } else {
-              ////////////////////////////////
             }
           });
       }
@@ -188,33 +178,28 @@ export default {
     }
   },
   mounted() {
-    //moment.locale("ru");
-
     this.form.friend = this.username;
     let self = this;
     axios.get("/api/get_chat_with?username=" + this.username).then(
       function(response) {
-        console.log(response.data);
         if (response.data.answer === true) {
           self.friend = response.data.user_info;
           self.waiting = false;
           self.getMessages();
           self.interId = setInterval(() => {
             self.getMessages();
-            console.log("Говнищее");
           }, 2000);
         } else {
-          //$router.push('/');
+          self.$router.push("/404");
         }
       },
       function(error) {
-        console.log(error);
+        self.$router.push("/404");
       }
     );
   },
   beforeDestroy() {
     clearInterval(this.interId);
-    console.log("Говнище Убрано");
   }
 };
 </script>

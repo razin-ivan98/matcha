@@ -90,14 +90,12 @@ export default {
       axios.post("/api/password_recovery/change", this.passForm).then(
         function(response) {
           if (response.data.answer) self.showAlert("success", "Success");
-          else self.showAlert("danger", "Error");
+          else self.showAlert("danger", "Error: " + response.data.details);
         },
         function(error) {
-          console.log(error);
           self.showAlert("danger", "Error");
         }
       );
-      //console.log(this.passForm);
     },
     countDownChanged(dismissCountDown) {
       this.dismissCountDown = dismissCountDown;
