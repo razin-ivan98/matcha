@@ -39,8 +39,8 @@ import os
 @app.route('/likes')
 @app.route('/index')
 def index():
-    if 'signed_user' in session and session['registration_ended'] == 0:
-        return redirect("/#/input_data", 302)
+    # if 'signed_user' in session and session['registration_ended'] == 0:
+    #     return redirect("/#/input_data", 302)
     return send_file("static/index.html")
 
 @app.route('/api/sign_in', methods=['POST'])

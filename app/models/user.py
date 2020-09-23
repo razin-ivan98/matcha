@@ -279,11 +279,11 @@ class User(Model):
         cursor = self.db.cursor()
         params = (user,)
         cursor.execute("SELECT * FROM users WHERE register_data=1 AND register_image=1 AND register_geo=1 AND name=%s", params)
-        cursor.execute("UPDATE users SET rating = rating + 20 WHERE name=%s", params)
 
         cursor.fetchall()
         if (cursor.rowcount == 0):
             return False
+        cursor.execute("UPDATE users SET rating = rating + 20 WHERE name=%s", params)
         return True
 
     def report(self, user, reported_user):
