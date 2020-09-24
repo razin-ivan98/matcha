@@ -95,170 +95,172 @@
     </div>
 
     <b-navbar variant="success" fixed="bottom">
-      <b-card no-body class="mb-1 w-75 mx-auto">
+      <b-card no-body class="mx-auto overflow-auto" style="max-height: 80vh;">
         <b-card-header header-tag="header" class="p-0" role="tab">
           <b-button v-b-toggle.accordion-1 variant="success" class="w-100">
             Feed settings
           </b-button>
         </b-card-header>
-        <b-collapse id="accordion-1" class="mt-2">
-          <b-card-body>
-            <b-tabs content-class="mt-3">
-              <b-tab title="Mode" active>
-                <p>
-                  <b-form-group>
-                    <b-form-radio v-model="filtres.show" value="recommended"
-                      >Recommended</b-form-radio
-                    >
+        <b-collapse id="accordion-1" class="">
+          <div>
+            <b-card-body>
+              <b-tabs content-class="mt-3">
+                <b-tab title="Mode" active>
+                  <p>
+                    <b-form-group>
+                      <b-form-radio v-model="filtres.show" value="recommended"
+                        >Recommended</b-form-radio
+                      >
 
-                    <b-form-radio v-model="filtres.show" value="custom"
-                      >Advanced search</b-form-radio
-                    >
-                    <b-form-group v-if="filtres.show == 'custom'">
-                      <b-form-group label="Gender">
-                        <b-form-checkbox-group
-                          id="checkbox-group-2"
-                          v-model="filtres.gender"
-                          name="flavour-2"
-                        >
-                          <b-form-checkbox value="Male">Male</b-form-checkbox>
-                          <b-form-checkbox value="Female"
-                            >Female</b-form-checkbox
+                      <b-form-radio v-model="filtres.show" value="custom"
+                        >Advanced search</b-form-radio
+                      >
+                      <b-form-group v-if="filtres.show == 'custom'">
+                        <b-form-group label="Gender">
+                          <b-form-checkbox-group
+                            id="checkbox-group-2"
+                            v-model="filtres.gender"
+                            name="flavour-2"
                           >
-                        </b-form-checkbox-group>
-                      </b-form-group>
+                            <b-form-checkbox value="Male">Male</b-form-checkbox>
+                            <b-form-checkbox value="Female"
+                              >Female</b-form-checkbox
+                            >
+                          </b-form-checkbox-group>
+                        </b-form-group>
 
-                      <b-form-group label="Orientation">
-                        <b-form-checkbox-group
-                          id="checkbox-group-3"
-                          v-model="filtres.orientation"
-                          name="flavour-2"
-                        >
-                          <b-form-checkbox value="Natural"
-                            >Natural</b-form-checkbox
+                        <b-form-group label="Orientation">
+                          <b-form-checkbox-group
+                            id="checkbox-group-3"
+                            v-model="filtres.orientation"
+                            name="flavour-2"
                           >
-                          <b-form-checkbox value="Gomosexual"
-                            >Gomosexual</b-form-checkbox
-                          >
-                          <b-form-checkbox value="Bisexual"
-                            >Bisexual</b-form-checkbox
-                          >
-                        </b-form-checkbox-group>
-                      </b-form-group>
+                            <b-form-checkbox value="Natural"
+                              >Natural</b-form-checkbox
+                            >
+                            <b-form-checkbox value="Gomosexual"
+                              >Gomosexual</b-form-checkbox
+                            >
+                            <b-form-checkbox value="Bisexual"
+                              >Bisexual</b-form-checkbox
+                            >
+                          </b-form-checkbox-group>
+                        </b-form-group>
 
-                      <b-form-group label="Age">
-                        From
-                        <b-form-spinbutton
-                          v-model="filtres.age[0]"
-                          min="0"
-                          max="130"
-                          inline
-                          size="sm"
-                        ></b-form-spinbutton>
-                        To
-                        <b-form-spinbutton
-                          v-model="filtres.age[1]"
-                          min="0"
-                          max="130"
-                          inline
-                          size="sm"
-                        ></b-form-spinbutton>
-                      </b-form-group>
-                      <b-form-group label="Rating">
-                        From
-                        <b-form-spinbutton
-                          v-model="filtres.rating[0]"
-                          min="0"
-                          max="5000"
-                          inline
-                          size="sm"
-                        ></b-form-spinbutton>
-                        To
-                        <b-form-spinbutton
-                          v-model="filtres.rating[1]"
-                          min="0"
-                          max="5000"
-                          inline
-                          size="sm"
-                        ></b-form-spinbutton>
-                      </b-form-group>
-                      <b-form-group label="Geo Distance (km)">
-                        From
-                        <b-form-spinbutton
-                          v-model="filtres.geo[0]"
-                          min="0"
-                          max="20000"
-                          inline
-                          size="sm"
-                        ></b-form-spinbutton>
-                        To
-                        <b-form-spinbutton
-                          v-model="filtres.geo[1]"
-                          min="0"
-                          max="20000"
-                          inline
-                          size="sm"
-                        ></b-form-spinbutton>
-                      </b-form-group>
-                      <b-form-group label="Common tags">
-                        From
-                        <b-form-spinbutton
-                          v-model="filtres.common_tags[0]"
-                          min="0"
-                          max="20"
-                          inline
-                          size="sm"
-                        ></b-form-spinbutton>
-                        To
-                        <b-form-spinbutton
-                          v-model="filtres.common_tags[1]"
-                          min="0"
-                          max="20"
-                          inline
-                          size="sm"
-                        ></b-form-spinbutton>
+                        <b-form-group label="Age">
+                          From
+                          <b-form-spinbutton
+                            v-model="filtres.age[0]"
+                            min="0"
+                            max="130"
+                            inline
+                            size="sm"
+                          ></b-form-spinbutton>
+                          To
+                          <b-form-spinbutton
+                            v-model="filtres.age[1]"
+                            min="0"
+                            max="130"
+                            inline
+                            size="sm"
+                          ></b-form-spinbutton>
+                        </b-form-group>
+                        <b-form-group label="Rating">
+                          From
+                          <b-form-spinbutton
+                            v-model="filtres.rating[0]"
+                            min="0"
+                            max="5000"
+                            inline
+                            size="sm"
+                          ></b-form-spinbutton>
+                          To
+                          <b-form-spinbutton
+                            v-model="filtres.rating[1]"
+                            min="0"
+                            max="5000"
+                            inline
+                            size="sm"
+                          ></b-form-spinbutton>
+                        </b-form-group>
+                        <b-form-group label="Geo Distance (km)">
+                          From
+                          <b-form-spinbutton
+                            v-model="filtres.geo[0]"
+                            min="0"
+                            max="20000"
+                            inline
+                            size="sm"
+                          ></b-form-spinbutton>
+                          To
+                          <b-form-spinbutton
+                            v-model="filtres.geo[1]"
+                            min="0"
+                            max="20000"
+                            inline
+                            size="sm"
+                          ></b-form-spinbutton>
+                        </b-form-group>
+                        <b-form-group label="Common tags">
+                          From
+                          <b-form-spinbutton
+                            v-model="filtres.common_tags[0]"
+                            min="0"
+                            max="20"
+                            inline
+                            size="sm"
+                          ></b-form-spinbutton>
+                          To
+                          <b-form-spinbutton
+                            v-model="filtres.common_tags[1]"
+                            min="0"
+                            max="20"
+                            inline
+                            size="sm"
+                          ></b-form-spinbutton>
+                        </b-form-group>
                       </b-form-group>
                     </b-form-group>
-                  </b-form-group>
-                </p>
-              </b-tab>
-              <b-tab title="Filtres">
-                <p>
-                  <b-form-radio v-model="filtres.filtres" value="all"
-                    >All</b-form-radio
-                  >
-                  <b-form-radio v-model="filtres.filtres" value="friends"
-                    >Friends</b-form-radio
-                  >
-                  <b-form-radio v-model="filtres.filtres" value="likers"
-                    >Likers</b-form-radio
-                  >
-                  <b-form-radio v-model="filtres.filtres" value="liked"
-                    >Liked</b-form-radio
-                  >
-                </p>
-              </b-tab>
-              <b-tab title="Sort">
-                <p>
-                  <b-form-radio v-model="filtres.sort" value="none"
-                    >None</b-form-radio
-                  >
-                  <b-form-radio v-model="filtres.sort" value="age"
-                    >Age</b-form-radio
-                  >
-                  <b-form-radio v-model="filtres.sort" value="rating"
-                    >Rating</b-form-radio
-                  >
-                  <b-form-radio v-model="filtres.sort" value="geo"
-                    >Geo Distance</b-form-radio
-                  >
-                  <b-form-radio v-model="filtres.sort" value="common_tags"
-                    >Common tags</b-form-radio
-                  >
-                </p>
-              </b-tab>
-            </b-tabs>
-          </b-card-body>
+                  </p>
+                </b-tab>
+                <b-tab title="Filtres">
+                  <p>
+                    <b-form-radio v-model="filtres.filtres" value="all"
+                      >All</b-form-radio
+                    >
+                    <b-form-radio v-model="filtres.filtres" value="friends"
+                      >Friends</b-form-radio
+                    >
+                    <b-form-radio v-model="filtres.filtres" value="likers"
+                      >Likers</b-form-radio
+                    >
+                    <b-form-radio v-model="filtres.filtres" value="liked"
+                      >Liked</b-form-radio
+                    >
+                  </p>
+                </b-tab>
+                <b-tab title="Sort">
+                  <p>
+                    <b-form-radio v-model="filtres.sort" value="none"
+                      >None</b-form-radio
+                    >
+                    <b-form-radio v-model="filtres.sort" value="age"
+                      >Age</b-form-radio
+                    >
+                    <b-form-radio v-model="filtres.sort" value="rating"
+                      >Rating</b-form-radio
+                    >
+                    <b-form-radio v-model="filtres.sort" value="geo"
+                      >Geo Distance</b-form-radio
+                    >
+                    <b-form-radio v-model="filtres.sort" value="common_tags"
+                      >Common tags</b-form-radio
+                    >
+                  </p>
+                </b-tab>
+              </b-tabs>
+            </b-card-body>
+          </div>
         </b-collapse>
       </b-card>
     </b-navbar>

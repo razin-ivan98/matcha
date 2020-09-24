@@ -25,4 +25,4 @@ deactivate
 mysql -h 127.0.0.1 -u root -p < dump.sql
 
 source flask/bin/activate
-python3 run.py --host 0.0.0.0
+flask run --host 0.0.0.0
